@@ -9,71 +9,44 @@
 
 void Main()
 {
-	//var lines = JsonConvert.DeserializeObject<List<string>>(File.ReadAllText("C:/Users/Chris/Desktop/lines.json"))
-		//.Select(a => a.Trim());
-
-	//var model = new Markov(3);
-	//model.Learn(lines.Distinct());
-	//model.Save("C:/Users/Chris/Desktop/QuotesMarkovModel.json");
-	
-	var model = Markov.Load("C:/Users/Chris/Desktop/QuotesMarkovModel.json");
-	
-	model.Retrain(4);
-	new { model.Level, NumLines = model.SourceLines.Count() }.Dump();
-	
-	model.Walk(1000).Select(a => new 
+	var lines = new string[]
 	{
-		a,
-		Exists = model.SourceLines.Contains(a.Trim())
-	})
-	.Where(a => a.Exists == false)
-	.Dump();
+		"I'll be back.",
+		"You talking to me?",
+		"May the Force be with you.",
+		"Frankly, my dear, I don't give a damn.",
+		"The only difference between me and a madman is that I'm not mad.",
+		"A mathematician is a device for turning coffee into theorems.",
+		"He is one of those people who would be enormously improved by death.",
+		"Mama always said life was like a box of chocolates. You never know what you're gonna get.",
+		"Many wealthy people are little more than janitors of their possessions."
+	};
 	
-	model.Save("C:/Users/Chris/Desktop/QuotesMarkovModel.json");
-}
-
-/*
-public void BuildLinesFile(List<string> existing)
-{
-	try
-	{
-		for(int i=0;i<2000;i++)
-		{
-			i.Dump();
-			existing.Add(GetQuote());
-		}
-	}
-	catch(Exception e)
-	{
-		e.Dump();
-	}
+	// Create a new model
+	var model = new Markov(1);
 	
-	File.WriteAllText("C:/Users/Chris/Desktop/lines.json", JsonConvert.SerializeObject(existing.Distinct().ToArray()));
-}
-
-public string GetQuote()
-{
+	// Or load a model which has been saved
+	// var model = Markov.Load("C:/MarkovModel.json");
 	
-	WebClient wc = new WebClient();
-	wc.Headers.Add("X-Mashape-Key", "6QlwCDNmnvmshUyuCJwpnehFiMBop1pwC5vjsnkhG1WZhqeHEa");
-	wc.Headers.Add("Content-Type", "application/x-www-form-urlencoded");
-	wc.Headers.Add("Accept", "application/json");
+	// Train the model with some data
+	model.Learn(lines);
 	
-	var response = wc.DownloadString("https://andruxnet-random-famous-quotes.p.mashape.com/?cat=famous");
-	var parsed = JsonConvert.DeserializeObject<Quote>(response);
-	return parsed.quote;
+	// Create some permutations
+	model.Walk(10).Dump();
+	
+	// Save a model for use later
+	//model.Save("C:/MarkovModel.json");
 }
-
-public class Quote
-{
-	public string quote {get;set;}
-}
-*/
 
 public class Markov
 {
 	public Markov(int level = 2)
 	{
+		if (level < 1)
+		{
+			throw new ArgumentException("Invalid value: level must be a positive integer", "level");
+		}
+		
 		Model = new Dictionary<SourceWords, List<string>>();
 		SourceLines = new List<string>();
 		Level = level;
