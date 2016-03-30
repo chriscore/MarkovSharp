@@ -8,15 +8,6 @@ Pull this repo and run the contained markov.linq file using LINQPad.
 The script should run and generate text using the embedded training data.
 There is also a file containing a few thousand famous quotes to use as additional training data.
 
-### Prerequisities
-
-What things you need to install the software and how to install them
-
-```
-LINQPad
-JSON.NET (auto-download via LINQPad nuget package manager)
-```
-
 ### Usage
 
 I have tried to make this library easy to use, the following will generate and train a Markov model with 2 levels of state.
