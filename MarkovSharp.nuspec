@@ -13,7 +13,4 @@
     <releaseNotes></releaseNotes>
     <tags>markov model machine learning text generation</tags>
   </metadata>
-  <files>
-	<file src="MarkovSharp\bin\Debug\MarkovSharp.dll" target="lib\net452\" />
-  </files>
 </package>
