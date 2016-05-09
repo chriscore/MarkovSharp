@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>MarkovSharp</id>
+    <version>1.0.0</version>
+    <title>MarkovSharp</title>
+    <authors>Chris Core</authors>
+    <owners>Chris Core</owners>
+    <licenseUrl>https://github.com/chriscore/MarkovSharp/blob/master/README.md</licenseUrl>
+    <projectUrl>https://github.com/chriscore/MarkovSharp</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>An easy to use C# implementation of an N-state Markov model.</description>
+    <releaseNotes></releaseNotes>
+    <tags>markov model machine learning text generation</tags>
+  </metadata>
+  <files>
+	<file src="MarkovSharp\bin\Debug\MarkovSharp.dll" target="lib\net452\" />
+  </files>
+</package>
