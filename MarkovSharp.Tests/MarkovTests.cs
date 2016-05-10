@@ -8,7 +8,7 @@ using NUnit.Framework;
 namespace MarkovSharp.Tests
 {
     [TestFixture]
-    public class Constructor : BaseMarkovTests
+    public class MarkovTests : BaseMarkovTests
     {
         [Test]
         public void ParameterlessConstructorUsesLevel2()
@@ -22,13 +22,6 @@ namespace MarkovSharp.Tests
         {
             var model = new Markov(4);
             Assert.AreEqual(4, model.Level);
-        }
-
-        [Test]
-        public void LevelPrivateSetOnly()
-        {
-            var model = new Markov();
-            Assert.IsFalse(model.GetType().GetProperty("Level").CanWrite);
         }
     }
 }

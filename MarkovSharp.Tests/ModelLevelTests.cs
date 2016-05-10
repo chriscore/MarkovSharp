@@ -10,7 +10,7 @@ using NUnit.Framework;
 namespace MarkovSharp
 {
     [TestFixture]
-    public class ModelLevel : BaseMarkovTests
+    public class ModelLevelTests : BaseMarkovTests
     {
         [Test]
         public void LevelCorrectWhenModelIsLoadedUsingDefault()

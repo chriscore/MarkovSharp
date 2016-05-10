@@ -8,7 +8,7 @@ using NUnit.Framework;
 namespace MarkovSharp.Tests
 {
     [TestFixture]
-    public class Learn : BaseMarkovTests
+    public class LearnTests : BaseMarkovTests
     {
         [Test]
         public void LinesAreAddedToModelOnLearn()

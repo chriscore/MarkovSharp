@@ -10,7 +10,7 @@ using NUnit.Framework;
 namespace MarkovSharp.Tests
 {
     [TestFixture]
-    public class SaveLoad : BaseMarkovTests
+    public class SaveLoadTests : BaseMarkovTests
     {
         [Test]
         public void CanSaveEmptyModel()

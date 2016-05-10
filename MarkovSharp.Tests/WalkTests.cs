@@ -8,7 +8,7 @@ using NUnit.Framework;
 namespace MarkovSharp.Tests
 {
     [TestFixture]
-    public class Walk :BaseMarkovTests
+    public class WalkTests :BaseMarkovTests
     {
         [Test]
         public void WalkOnUntrainedModelIsEmpty()

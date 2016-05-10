@@ -8,7 +8,7 @@ using NUnit.Framework;
 namespace MarkovSharp.Tests
 {
     [TestFixture]
-    public class Retrain : BaseMarkovTests
+    public class RetrainTests : BaseMarkovTests
     {
         [TestCase(1)]
         [TestCase(3)]

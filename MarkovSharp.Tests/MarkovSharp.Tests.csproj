@@ -49,13 +49,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BaseMarkovTests.cs" />
-    <Compile Include="Constructor.cs" />
-    <Compile Include="Learn.cs" />
-    <Compile Include="ModelLevel.cs" />
+    <Compile Include="MarkovTests.cs" />
+    <Compile Include="LearnTests.cs" />
+    <Compile Include="ModelLevelTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Retrain.cs" />
-    <Compile Include="SaveLoad.cs" />
-    <Compile Include="Walk.cs" />
+    <Compile Include="RetrainTests.cs" />
+    <Compile Include="SaveLoadTests.cs" />
+    <Compile Include="WalkTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MarkovSharp\MarkovSharp.csproj">
