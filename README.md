@@ -1,5 +1,7 @@
 # MarkovSharp
 
+[![chriscore MyGet Build Status](https://www.myget.org/BuildSource/Badge/chriscore?identifier=2e1ed033-4736-4537-9a85-1ad807bf13c3)](https://www.myget.org/)
+
 An easy to use C# implementation of an N-state Markov model.
 
 ## Getting Started
@@ -37,4 +39,3 @@ I have tried to make this library easy to use. Once built, the following will ge
 
 This project is licensed under the MIT License
 
-[![chriscore MyGet Build Status](https://www.myget.org/BuildSource/Badge/chriscore?identifier=2e1ed033-4736-4537-9a85-1ad807bf13c3)](https://www.myget.org/)
