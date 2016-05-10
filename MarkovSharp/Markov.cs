@@ -136,6 +136,11 @@ namespace MarkovSharp
 
         public void Retrain(int newLevel)
         {
+            if (newLevel < 1)
+            {
+                throw new ArgumentException("Invalid argument - retrain level must be a positive integer", nameof(newLevel));
+            }
+
             Console.WriteLine("Retraining model as level {0}", newLevel);
             Level = newLevel;
 
@@ -159,11 +164,29 @@ namespace MarkovSharp
 
         public IEnumerable<string> Walk(int lines = 1, string seed = "")
         {
+            if (lines < 1)
+            {
+                throw new ArgumentException("Invalid argument - line count for walk must be a positive integer", nameof(lines));
+            }
+
             var sentences = new List<string>();
 
-            for (var z = 0; z < lines; z++)
+            //for (var z = 0; z < lines; z++)
+            int genCount = 0;
+            while (sentences.Count < lines)
             {
-                sentences.Add(WalkLine(seed));
+                if (genCount == lines*10)
+                {
+                    Console.WriteLine($"Breaking out of walk early - {genCount} generations did not produce {lines} distinct lines ({sentences} were created)");
+                    break;
+                }
+                var result = WalkLine(seed);
+                if (!SourceLines.Contains(result))
+                {
+                    sentences.Add(result);
+                }
+
+                genCount++;
             }
 
             return sentences;

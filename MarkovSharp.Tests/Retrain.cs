@@ -55,5 +55,17 @@ namespace MarkovSharp.Tests
                 Assert.AreNotEqual(dict.Sum(a => a.Key.Before.Count()), model.Model.Sum(a => a.Key.Before.Count()));
             }
         }
+
+        [TestCase(0)]
+        [TestCase(-1)]
+        [TestCase(int.MinValue)]
+        public void RetrainValueMustBePositiveInteger(int retrainDepth)
+        {
+            var model = new Markov();
+            model.Learn(ExampleData);
+
+            var ex = Assert.Throws<ArgumentException>(() => model.Retrain(retrainDepth));
+            Assert.AreEqual("Invalid argument - retrain level must be a positive integer\r\nParameter name: newLevel", ex.Message);
+        }
     }
 }

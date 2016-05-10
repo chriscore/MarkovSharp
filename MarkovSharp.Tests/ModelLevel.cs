@@ -13,20 +13,6 @@ namespace MarkovSharp
     public class ModelLevel : BaseMarkovTests
     {
         [Test]
-        public void ParameterlessConstructorUsesLevel2()
-        {
-            var model = new Markov();
-            Assert.AreEqual(2, model.Level);
-        }
-
-        [Test]
-        public void LevelCanBeSetUsingConstructor()
-        {
-            var model = new Markov(4);
-            Assert.AreEqual(4, model.Level);
-        }
-
-        [Test]
         public void LevelCorrectWhenModelIsLoadedUsingDefault()
         {
             var model = new Markov(3);

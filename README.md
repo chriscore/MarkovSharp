@@ -27,7 +27,7 @@ I have tried to make this library easy to use. Once built, the following will ge
 	model.Learn(lines);
 	
 	// Create some permutations
-	model.Walk(1).Dump();
+	Console.WriteLine(model.Walk(1).First());
 	
 	// Output:
 	// Frankly, my dear, I don't give a box of their possessions.  
