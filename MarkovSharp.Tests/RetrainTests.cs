@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -40,7 +41,7 @@ namespace MarkovSharp.Tests
         {
             var model = new Markov();
             model.Learn(ExampleData);
-            var dict = new Dictionary<SourceWords, List<string>>(model.Model);
+            var dict = new ConcurrentDictionary<SourceWords, List<string>>(model.Model);
 
             model.Retrain(retrainDepth);
 

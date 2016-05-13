@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 
 namespace MarkovSharp
@@ -17,17 +19,25 @@ namespace MarkovSharp
                 throw new ArgumentException("Invalid value: level must be a positive integer", nameof(level));
             }
 
-            Model = new Dictionary<SourceWords, List<string>>();
+            Model = new ConcurrentDictionary<SourceWords, List<string>>();
             SourceLines = new List<string>();
             Level = level;
+            EnsureUniqueWalk = false;
         }
 
         // Dictionary containing the model data. The key is the N number of
         // previous words and value is a list of possible outcomes, given that key
         [JsonIgnore]
-        public Dictionary<SourceWords, List<string>> Model { get; set; }
+        public ConcurrentDictionary<SourceWords, List<string>> Model { get; set; }
 
         public List<string> SourceLines { get; set; }
+
+
+        /// <summary>
+        /// Set to true to ensure that all lines generated are different and not same as the training data.
+        /// This might not return as many lines as requested if genreation is exhausted and finds no new unique values.
+        /// </summary>
+        public bool EnsureUniqueWalk { get; set; }
 
         // The number of previous states for the model to to consider when 
         //suggesting the next state
@@ -35,25 +45,21 @@ namespace MarkovSharp
 
         public void Learn(IEnumerable<string> sentences, bool ignoreAlreadyLearnt = true)
         {
+            sentences = sentences.Select(a => a.Trim());
+
             if (ignoreAlreadyLearnt)
             {
-                var newTerms = sentences.Where(s => !SourceLines.Contains(s.Trim()));
+                var newTerms = sentences.Where(s => !SourceLines.Contains(s));
 
                 Console.WriteLine("Learning {0} lines", newTerms.Count());
                 // For every sentence which hasnt already been learnt, learn it
-                foreach (var sentence in newTerms)
-                {
-                    Learn(sentence.Trim());
-                }
+                Parallel.ForEach(sentences, Learn);
             }
             else
             {
                 Console.WriteLine("Learning {0} lines", sentences.Count());
                 // For every sentence, learn it
-                foreach (var sentence in sentences)
-                {
-                    Learn(sentence.Trim());
-                }
+                Parallel.ForEach(sentences, Learn);
             }
         }
 
@@ -83,7 +89,31 @@ namespace MarkovSharp
                 .ToArray();
 
 
-            for (var i = 0; i < tokens.Length; i++)
+            LearnTokens(tokens);
+            
+            var lastCol = new List<string>();
+            for (var j = Level; j > 0; j--)
+            {
+                string previous;
+                try
+                {
+                    previous = tokens[tokens.Length - j];
+                    lastCol.Add(previous);
+                }
+                catch (IndexOutOfRangeException)
+                {
+                    previous = "";
+                    lastCol.Add(previous);
+                }
+            }
+
+            var finalKey = new SourceWords(lastCol.ToArray());
+            AddOrCreate(finalKey, null);
+        }
+
+        private void LearnTokens(IReadOnlyList<string> tokens)
+        {
+            for (var i = 0; i < tokens.Count; i++)
             {
                 var current = tokens[i];
 
@@ -113,25 +143,6 @@ namespace MarkovSharp
                 var key = new SourceWords(previousCol.ToArray());
                 AddOrCreate(key, current);
             }
-            
-            var lastCol = new List<string>();
-            for (var j = Level; j > 0; j--)
-            {
-                string previous;
-                try
-                {
-                    previous = tokens[tokens.Length - j];
-                    lastCol.Add(previous);
-                }
-                catch (IndexOutOfRangeException)
-                {
-                    previous = "";
-                    lastCol.Add(previous);
-                }
-            }
-
-            var finalKey = new SourceWords(lastCol.ToArray());
-            AddOrCreate(finalKey, null);
         }
 
         public void Retrain(int newLevel)
@@ -145,20 +156,25 @@ namespace MarkovSharp
             Level = newLevel;
 
             // Empty the model so it can be rebuilt
-            Model = new Dictionary<SourceWords, List<string>>();
+            Model = new ConcurrentDictionary<SourceWords, List<string>>();
 
             Learn(SourceLines, false);
         }
 
+        private object lockObj = new object();
+
         private void AddOrCreate(SourceWords key, string value)
         {
-            if (!Model.ContainsKey(key))
+            lock (lockObj)
             {
-                Model.Add(key, new List<string> { value });
-            }
-            else
-            {
-                Model[key].Add(value);
+                if (!Model.ContainsKey(key))
+                {
+                    Model.TryAdd(key, new List<string> {value});
+                }
+                else
+                {
+                    Model[key].Add(value);
+                }
             }
         }
 
@@ -173,23 +189,25 @@ namespace MarkovSharp
 
             //for (var z = 0; z < lines; z++)
             int genCount = 0;
-            while (sentences.Count < lines)
+            int created = 0;
+            while (created < lines)
             {
                 if (genCount == lines*10)
                 {
-                    Console.WriteLine($"Breaking out of walk early - {genCount} generations did not produce {lines} distinct lines ({sentences} were created)");
+                    Console.WriteLine($"Breaking out of walk early - {genCount} generations did not produce {lines} distinct lines ({sentences.Count} were created)");
                     break;
                 }
                 var result = WalkLine(seed);
-                if (!SourceLines.Contains(result))
+                if ((!EnsureUniqueWalk || !SourceLines.Contains(result)) && (!EnsureUniqueWalk || !sentences.Contains(result)))
                 {
                     sentences.Add(result);
+                    created++;
+                    yield return result;
                 }
-
                 genCount++;
             }
 
-            return sentences;
+            //return sentences;
         }
 
         private string WalkLine(string seed)

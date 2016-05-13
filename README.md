@@ -6,12 +6,14 @@ An easy to use C# implementation of an N-state Markov model.
 
 ## Getting Started
 
-Pull and build the class library to make use of it.
-I have included a file containing some training data with famous quotes to use as trainng data and test with.
+Download and reference the latest version of MarkovSharp from NuGet here: https://www.nuget.org/packages/MarkovSharp
+Alternatively, just pull and build the class library to get going.
+
+This repo has a file containing some training data with famous quotes to use and test with.
 
 ### Usage
 
-I have tried to make this library easy to use. Once built, the following will generate and train a Markov model with 2 levels of state.
+I have tried to make this library really easy to use. Once referenced, the following will generate and train a second order Markov model.
 
 ```
 	// Some training data

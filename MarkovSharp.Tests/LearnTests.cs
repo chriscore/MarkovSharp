@@ -11,11 +11,48 @@ namespace MarkovSharp.Tests
     public class LearnTests : BaseMarkovTests
     {
         [Test]
+        public void LearnEmptyStringDoesNotThrow()
+        {
+            var model = new Markov();
+            Assert.DoesNotThrow(() => model.Learn(""));
+        }
+
+        [Test]
+        public void LearnEmptyStringDoesNotAddToSourceLinesOrModel()
+        {
+            var model = new Markov();
+            model.Learn("");
+
+            CollectionAssert.AreEquivalent(new List<string>(), model.SourceLines);
+            Assert.AreEqual(0, model.SourceLines.Count);
+            Assert.AreEqual(0, model.Model.Sum(x => x.Value.Count));
+        }
+
+        [Test]
+        public void LearnNullStringDoesNotThrow()
+        {
+            var model = new Markov();
+            Assert.DoesNotThrow(() => model.Learn(null));
+        }
+
+        [Test]
+        public void LearnNullStringDoesNotAddToSourceLinesOrModel()
+        {
+            var model = new Markov();
+            model.Learn(null);
+
+            CollectionAssert.AreEquivalent(new List<string>(), model.SourceLines);
+            Assert.AreEqual(0, model.SourceLines.Count);
+            Assert.AreEqual(0, model.Model.Sum(x => x.Value.Count));
+        }
+
+        [Test]
         public void LinesAreAddedToModelOnLearn()
         {
             var model = new Markov();
             model.Learn(ExampleData);
 
+            Assert.AreEqual(ExampleData.Count(), model.SourceLines.Count);
             CollectionAssert.AreEquivalent(ExampleData, model.SourceLines);
         }
 
@@ -24,10 +61,11 @@ namespace MarkovSharp.Tests
         {
             var model = new Markov();
             model.Learn(ExampleData);
+            
+            Assert.AreEqual(ExampleData.Count(s => s.Split(' ').Length > model.Level), model.SourceLines.Count);
+            CollectionAssert.AreEquivalent(ExampleData.Where(s => s.Split(' ').Length > model.Level), model.SourceLines);
 
-            CollectionAssert.AreEquivalent(ExampleData, model.SourceLines);
-
-            model.Learn("I do not like green eggs and ham");
+            model.Learn("I do not like green eggs and hams");
             Assert.AreEqual(ExampleData.Count() + 1, model.SourceLines.Count);
         }
 
@@ -38,8 +76,11 @@ namespace MarkovSharp.Tests
             model.Learn(ExampleData);
             model.Learn(ExampleData);
 
-            CollectionAssert.AreEquivalent(ExampleData, model.SourceLines);
+            var e1 = ExampleData.Except(model.SourceLines).ToList();
+
             Assert.AreEqual(ExampleData.Count(), model.SourceLines.Count);
+            Assert.That(ExampleData.ToList(), Is.EquivalentTo(model.SourceLines));
+            Assert.That(model.SourceLines, Is.Unique);
         }
 
         [Test]
@@ -52,17 +93,7 @@ namespace MarkovSharp.Tests
             CollectionAssert.AreEquivalent(new List<string> { "Testing the model" }, model.SourceLines);
             Assert.AreEqual(1, model.SourceLines.Count);
             Assert.AreEqual(8, model.Model.Sum(x => x.Value.Count));
-        }
-
-        [Test]
-        public void LearnEmptyString()
-        {
-            var model = new Markov();
-            model.Learn("");
-
-            CollectionAssert.AreEquivalent(new List<string> (), model.SourceLines);
-            Assert.AreEqual(0, model.SourceLines.Count);
-            Assert.AreEqual(0, model.Model.Sum(x => x.Value.Count));
+            Assert.That(model.SourceLines, Is.Unique);
         }
 
         [Test]
