@@ -31,7 +31,7 @@ I have tried to make this library really easy to use. Once referenced, the follo
 	model.Learn(lines);
 	
 	// Create some permutations
-	Console.WriteLine(model.Walk(1).First());
+	Console.WriteLine(model.Walk().First());
 	
 	// Output:
 	// Frankly, my dear, I don't give a box of their possessions.  
