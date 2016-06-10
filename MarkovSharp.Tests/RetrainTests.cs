@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MarkovSharp.TokenisationStrategies;
 using NUnit.Framework;
 
 namespace MarkovSharp.Tests
@@ -15,7 +16,7 @@ namespace MarkovSharp.Tests
         [TestCase(3)]
         public void RetrainingSetsCorrectDictionaryKeyLength(int retrainDepth)
         {
-            var model = new Markov();
+            var model = new StringMarkov();
             model.Learn(ExampleData);
 
             model.Retrain(retrainDepth);
@@ -26,7 +27,7 @@ namespace MarkovSharp.Tests
         [TestCase(3)]
         public void SourceLinesAreSameAfterRetrained(int retrainDepth)
         {
-            var model = new Markov();
+            var model = new StringMarkov();
             model.Learn(ExampleData);
             var oldLines = new List<string>(model.SourceLines);
 
@@ -39,9 +40,9 @@ namespace MarkovSharp.Tests
         [TestCase(3, false)]
         public void RetrainedModelIsNotSameIfLevelIsDifferent(int retrainDepth, bool expectSameModel)
         {
-            var model = new Markov();
+            var model = new StringMarkov();
             model.Learn(ExampleData);
-            var dict = new ConcurrentDictionary<SourceWords, List<string>>(model.Model);
+            var dict = new ConcurrentDictionary<SourceGrams<string>, List<string>>(model.Model); // this will break for non string type models during testing until fixed
 
             model.Retrain(retrainDepth);
 
@@ -62,7 +63,7 @@ namespace MarkovSharp.Tests
         [TestCase(int.MinValue)]
         public void RetrainValueMustBePositiveInteger(int retrainDepth)
         {
-            var model = new Markov();
+            var model = new StringMarkov();
             model.Learn(ExampleData);
 
             var ex = Assert.Throws<ArgumentException>(() => model.Retrain(retrainDepth));

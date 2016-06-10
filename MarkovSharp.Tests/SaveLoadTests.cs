@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using log4net;
+using MarkovSharp.TokenisationStrategies;
 using Newtonsoft.Json;
 using NUnit.Framework;
 
@@ -12,35 +14,39 @@ namespace MarkovSharp.Tests
     [TestFixture]
     public class SaveLoadTests : BaseMarkovTests
     {
+        private readonly ILog Logger = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         [Test]
         public void CanSaveEmptyModel()
         {
-            var model = new Markov();
+            var model = new StringMarkov();
             model.Save(ModelFileName);
+            
+            var forLoading = new StringMarkov();
+            var newmodel = forLoading.Load(ModelFileName, model.Level);
 
-            var savedModel = Markov.Load(ModelFileName, model.Level);
-
-            Assert.AreEqual(model.Level, savedModel.Level);
-            Assert.AreEqual(model.SourceLines, savedModel.SourceLines);
+            Assert.AreEqual(model.Level, forLoading.Level);
+            Assert.AreEqual(model.SourceLines, forLoading.SourceLines);
         }
 
         [Test]
         public void CanSaveTrainedModel()
         {
-            var model = new Markov();
+            var model = new StringMarkov();
             model.Learn(ExampleData);
             model.Save(ModelFileName);
 
-            var savedModel = Markov.Load(ModelFileName, model.Level);
+            var forLoading = new StringMarkov();
+            var newmodel = forLoading.Load(ModelFileName, model.Level);
 
-            Assert.AreEqual(model.Level, savedModel.Level);
-            Assert.AreEqual(model.SourceLines, savedModel.SourceLines);
+            Assert.AreEqual(model.Level, forLoading.Level);
+            Assert.AreEqual(model.SourceLines, forLoading.SourceLines);
         }
 
         [Test]
         public void SavedFileDoesntContainModelDictionary()
         {
-            var model = new Markov();
+            var model = new StringMarkov();
             model.Learn(ExampleData);
             model.Save(ModelFileName);
 
@@ -52,7 +58,7 @@ namespace MarkovSharp.Tests
         [Test]
         public void SavedFileContainsLevel()
         {
-            var model = new Markov();
+            var model = new StringMarkov();
             model.Learn(ExampleData);
             model.Save(ModelFileName);
 
@@ -66,16 +72,34 @@ namespace MarkovSharp.Tests
         [TestCase(3)]
         public void CanLoadWithGivenLevel(int newLevel)
         {
-            var model = new Markov(1);
+            var model = new StringMarkov(1);
             model.Learn(ExampleData);
             model.Save(ModelFileName);
 
-            var savedModel = Markov.Load(ModelFileName, newLevel);
+            var forLoading = new StringMarkov();
+            var newmodel = forLoading.Load(ModelFileName, newLevel);
 
-            Assert.AreEqual(newLevel, savedModel.Level);
-            Assert.AreEqual(model.SourceLines, savedModel.SourceLines);
+            Assert.AreEqual(newLevel, forLoading.Level);
+            Assert.AreEqual(model.SourceLines, forLoading.SourceLines);
             
-            Assert.AreEqual(newLevel, savedModel.Model.Max(a => a.Key.Before.Length));
+            Assert.AreEqual(newLevel, forLoading.Model.Max(a => a.Key.Before.Length));
+        }
+
+        [Test]
+        public void CanWalkLoadedModel()
+        {
+            var model = new StringMarkov(1);
+            model.Learn(ExampleData);
+            model.Save(ModelFileName);
+
+            var forLoading = new StringMarkov();
+            var newmodel = forLoading.Load(ModelFileName);
+            
+            var lines = newmodel.Walk();
+
+            Logger.Info(string.Join("\r\n", lines));
+            Assert.AreEqual(1, lines.Count());
+            Assert.That(lines.First(), Is.Not.Empty);
         }
     }
 }

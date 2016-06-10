@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using log4net;
+using MarkovSharp.TokenisationStrategies;
 using Newtonsoft.Json;
 using NUnit.Framework;
 
@@ -11,10 +13,12 @@ namespace MarkovSharp.Tests
 {
     public class BaseMarkovTests
     {
+        private readonly ILog Logger = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         [SetUp]
         public void Setup()
         {
-            Console.WriteLine("Running Setup..");
+            Logger.Info("Running Setup..");
             if (File.Exists("ExampleModel.json"))
             {
                 File.Delete("ExampleModel.json");

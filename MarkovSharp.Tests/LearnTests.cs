@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MarkovSharp.TokenisationStrategies;
 using NUnit.Framework;
 
 namespace MarkovSharp.Tests
@@ -13,14 +14,14 @@ namespace MarkovSharp.Tests
         [Test]
         public void LearnEmptyStringDoesNotThrow()
         {
-            var model = new Markov();
+            var model = new StringMarkov();
             Assert.DoesNotThrow(() => model.Learn(""));
         }
 
         [Test]
         public void LearnEmptyStringDoesNotAddToSourceLinesOrModel()
         {
-            var model = new Markov();
+            var model = new StringMarkov();
             model.Learn("");
 
             CollectionAssert.AreEquivalent(new List<string>(), model.SourceLines);
@@ -31,14 +32,14 @@ namespace MarkovSharp.Tests
         [Test]
         public void LearnNullStringDoesNotThrow()
         {
-            var model = new Markov();
+            var model = new StringMarkov();
             Assert.DoesNotThrow(() => model.Learn(null));
         }
 
         [Test]
         public void LearnNullStringDoesNotAddToSourceLinesOrModel()
         {
-            var model = new Markov();
+            var model = new StringMarkov();
             model.Learn(null);
 
             CollectionAssert.AreEquivalent(new List<string>(), model.SourceLines);
@@ -49,7 +50,7 @@ namespace MarkovSharp.Tests
         [Test]
         public void LinesAreAddedToModelOnLearn()
         {
-            var model = new Markov();
+            var model = new StringMarkov();
             model.Learn(ExampleData);
 
             Assert.AreEqual(ExampleData.Count(), model.SourceLines.Count);
@@ -59,7 +60,7 @@ namespace MarkovSharp.Tests
         [Test]
         public void CanLearnLinesWithTrainedModel()
         {
-            var model = new Markov();
+            var model = new StringMarkov();
             model.Learn(ExampleData);
             
             Assert.AreEqual(ExampleData.Count(s => s.Split(' ').Length > model.Level), model.SourceLines.Count);
@@ -72,7 +73,7 @@ namespace MarkovSharp.Tests
         [Test]
         public void LearningDuplicateLinesAreIgnored()
         {
-            var model = new Markov();
+            var model = new StringMarkov();
             model.Learn(ExampleData);
             model.Learn(ExampleData);
 
@@ -86,7 +87,7 @@ namespace MarkovSharp.Tests
         [Test]
         public void CanLearnDuplicatesDoesNotAddDupeSourceLinesAddsDupeTransitions()
         {
-            var model = new Markov();
+            var model = new StringMarkov();
             model.Learn("Testing the model");
             model.Learn("Testing the model");
 
@@ -99,7 +100,7 @@ namespace MarkovSharp.Tests
         [Test]
         public void SentenceSmallerThanLevelIsNotAddedToSourceLines()
         {
-            var model = new Markov(5);
+            var model = new StringMarkov(5);
             model.Learn("A short sentence");
 
             CollectionAssert.AreEquivalent(new List<string>(), model.SourceLines);
@@ -108,10 +109,10 @@ namespace MarkovSharp.Tests
         [Test]
         public void SentenceSmallerThanLevelIsNotAddedToModel()
         {
-            var model = new Markov(5);
+            var model = new StringMarkov(5);
             model.Learn("A short sentence");
             
-            Assert.AreEqual(0, model.Model.Count);
+            Assert.AreEqual(0, model.Model.Count, string.Join(", ", model.Model.Select(a => string.Join(" ", a))));
         }
     }
 }

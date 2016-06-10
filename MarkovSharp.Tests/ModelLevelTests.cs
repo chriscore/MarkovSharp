@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MarkovSharp.Tests;
+using MarkovSharp.TokenisationStrategies;
 using NUnit.Framework;
 
 namespace MarkovSharp
@@ -15,25 +16,27 @@ namespace MarkovSharp
         [Test]
         public void LevelCorrectWhenModelIsLoadedUsingDefault()
         {
-            var model = new Markov(3);
+            var model = new StringMarkov(3);
 
             model.Learn(ExampleData);
             model.Save(ModelFileName);
 
-            var model2 = Markov.Load(ModelFileName);
-            Assert.AreEqual(1, model2.Level);
+            var model2 = model.Load(ModelFileName);
+            var loaded = model2 as StringMarkov;
+            Assert.AreEqual(1, loaded.Level);
         }
 
         [Test]
         public void LevelCorrectWhenModelIsLoadedUsingValue()
         {
-            var model = new Markov(3);
+            var model = new StringMarkov(3);
 
             model.Learn(ExampleData);
             model.Save(ModelFileName);
 
-            var model2 = Markov.Load(ModelFileName, 2);
-            Assert.AreEqual(2, model2.Level);
+            var model2 = model.Load(ModelFileName, 2);
+            var loaded = model2 as StringMarkov;
+            Assert.AreEqual(2, loaded.Level);
         }
 
         [TestCase(0)]
@@ -41,14 +44,14 @@ namespace MarkovSharp
         [TestCase(int.MinValue)]
         public void LevelInvalidValueThrowsArgumentException(int level)
         {
-            Assert.Throws<ArgumentException>(() => new Markov(level));
+            Assert.Throws<ArgumentException>(() => new StringMarkov(level));
         }
 
         [TestCase(1)]
         [TestCase(3)]
         public void RetrainingSetsCorrectLevel(int retrainDepth)
         {
-            var model = new Markov();
+            var model = new StringMarkov();
             model.Learn(ExampleData);
             Assert.AreEqual(2, model.Level);
 
