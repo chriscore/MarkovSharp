@@ -42,6 +42,10 @@
       <HintPath>..\MarkovSharp\packages\NUnit.2.6.4\lib\nunit.framework.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Sanford.Multimedia.Midi, Version=6.1.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\MarkovSharp\packages\Sanford.Multimedia.Midi.6.1.1\lib\net20\Sanford.Multimedia.Midi.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -55,6 +59,7 @@
     <Compile Include="BaseMarkovTests.cs" />
     <Compile Include="MarkovTests.cs" />
     <Compile Include="LearnTests.cs" />
+    <Compile Include="MidiMarkovTests.cs" />
     <Compile Include="ModelLevelTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RetrainTests.cs" />
@@ -71,6 +76,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="swars.mid">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="testlines.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

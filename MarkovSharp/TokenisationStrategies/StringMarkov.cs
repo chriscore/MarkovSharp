@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace MarkovSharp.TokenisationStrategies
 {
-    public class StringMarkov : GenericMarkov<string, string>, IMarkovModel<string, string>
+    public class StringMarkov : GenericMarkov<string, string>
     {
         public StringMarkov(int level = 2)
             : base(level)

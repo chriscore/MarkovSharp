@@ -75,15 +75,8 @@ namespace MarkovSharp
 
         // The number of previous states for the model to to consider when 
         //suggesting the next state
-        public int Level;
-
-        /*
-        public int GetLevel()
-        {
-            return Level;
-        }
-        */
-
+        public int Level { get; private set; }
+        
         public void Learn(IEnumerable<TPhrase> phrases, bool ignoreAlreadyLearnt = true)
         {
             if (ignoreAlreadyLearnt)
@@ -268,7 +261,7 @@ namespace MarkovSharp
                 built.AddRange(SplitTokens(seed));
             }
 
-            while (true && built.Count < 99999)
+            while (true && built.Count < 999)
             {
                 // Choose a new word to add from the model
                 var key = new SourceGrams<TGram>(q.Cast<TGram>().ToArray());
@@ -381,8 +374,8 @@ namespace MarkovSharp
             {
                 return false;
             }
-
-            var equals = this.Before.OrderBy(a => a).SequenceEqual(x.Before.OrderBy(a => a));
+            
+            var equals = Before.OrderBy(a => a).SequenceEqual(x.Before.OrderBy(a => a));
             return equals;
         }
 
