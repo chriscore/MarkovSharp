@@ -30,7 +30,7 @@ namespace MarkovSharp.TokenisationStrategies
                 if (token != null)
                 {
                     t.Insert(token.StartTime, new ChannelMessage(ChannelCommand.NoteOn, Channel, token.Pitch, token.Velocity));
-                    t.Insert(token.StartTime + token.Duration, new ChannelMessage(ChannelCommand.NoteOn, Channel, token.Pitch, 0));
+                    t.Insert(token.StartTime + token.Duration, new ChannelMessage(ChannelCommand.NoteOff, Channel, token.Pitch, 0));
                 }
             }
 

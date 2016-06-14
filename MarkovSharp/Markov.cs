@@ -261,9 +261,10 @@ namespace MarkovSharp
                 built.AddRange(SplitTokens(seed));
             }
 
-            while (true && built.Count < 999)
+            while (true && built.Count < 1500)
             {
                 // Choose a new word to add from the model
+                //Logger.Info($"In Walkline loop: builtcount = {built.Count}");
                 var key = new SourceGrams<TGram>(q.Cast<TGram>().ToArray());
                 if (Model.ContainsKey(key))
                 {
@@ -375,7 +376,7 @@ namespace MarkovSharp
                 return false;
             }
             
-            var equals = Before.OrderBy(a => a).SequenceEqual(x.Before.OrderBy(a => a));
+            var equals = Before.OrderBy(a => a).ToArray().SequenceEqual(x.Before.OrderBy(a => a).ToArray());
             return equals;
         }
 

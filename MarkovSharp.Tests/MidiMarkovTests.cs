@@ -24,12 +24,13 @@ namespace MarkovSharp.Tests
             for (int i = 1; i < trackNumbers; i++)
             {
                 Track t = s[i];
-                SanfordMidiMarkov model = new SanfordMidiMarkov(2);
+                SanfordMidiMarkov model = new SanfordMidiMarkov(1);
+                model.EnsureUniqueWalk = true;
                 model.Learn(t);
 
-                var result = model.Walk(1);
+                var result = model.Walk(5);
 
-                var built = result.First();
+                var built = result.OrderBy(a => Guid.NewGuid()).FirstOrDefault();
                 
                 sNew.Add(built);
             }
