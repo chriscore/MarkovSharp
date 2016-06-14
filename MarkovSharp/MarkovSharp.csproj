@@ -55,6 +55,7 @@
     <Compile Include="Markov.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TokenisationStrategies\IMarkovModel.cs" />
+    <Compile Include="TokenisationStrategies\MidiEventMarkov.cs" />
     <Compile Include="TokenisationStrategies\SanfordMidiMarkov.cs" />
     <Compile Include="TokenisationStrategies\StringMarkov.cs" />
   </ItemGroup>

@@ -26,6 +26,9 @@ namespace MarkovSharp.TokenisationStrategies
         
         IMarkovModel<TPhrase, TGram> Load(string file, int level = 1);
 
+        TGram GetTerminatorGram();
+
+        TGram GetPrepadGram();
         //int GetLevel();
     }
 }

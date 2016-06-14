@@ -66,7 +66,17 @@ namespace MarkovSharp
         {
             throw new ArgumentException("Please do not use GenericMarkov directly - instead, inherit from GenericMarkov and extend SplitTokens and RebuildPhrase methods. An interface IMarkovModel is provided for ease of use.");
         }
-        
+
+        public virtual TGram GetTerminatorGram()
+        {
+            throw new NotImplementedException();
+        }
+
+        public virtual TGram GetPrepadGram()
+        {
+            throw new NotImplementedException();
+        }
+
         /// <summary>
         /// Set to true to ensure that all lines generated are different and not same as the training data.
         /// This might not return as many lines as requested if genreation is exhausted and finds no new unique values.
@@ -136,14 +146,14 @@ namespace MarkovSharp
                 catch (IndexOutOfRangeException e)
                 {
                     Logger.Info($"Caught an exception: {e}");
-                    previous = default(TGram);
+                    previous = GetPrepadGram();
                     lastCol.Add(previous);
                 }
             }
 
             Logger.Info($"Reached final key for phrase {phrase}");
             var finalKey = new SourceGrams<TGram>(lastCol.ToArray());
-            AddOrCreate(finalKey, default(TGram));
+            AddOrCreate(finalKey, GetTerminatorGram());
         }
 
         private void LearnTokens(IReadOnlyList<TGram> tokens)
@@ -160,7 +170,7 @@ namespace MarkovSharp
                     {
                         if (i - j < 0)
                         {
-                            previousCol.Add(default(TGram));
+                            previousCol.Add(GetPrepadGram());
                         }
                         else
                         {
@@ -170,7 +180,7 @@ namespace MarkovSharp
                     }
                     catch (IndexOutOfRangeException)
                     {
-                        previous = default(TGram);
+                        previous = GetPrepadGram();
                         previousCol.Add(previous);
                     }
                 }
@@ -215,6 +225,10 @@ namespace MarkovSharp
 
         public IEnumerable<TPhrase> Walk(int lines = 1, TPhrase seed = default(TPhrase))
         {
+            if (seed == null)
+            {
+                seed = RebuildPhrase(new List<TGram>() {GetPrepadGram()});
+            }
 
             Logger.Info($"Walking to return {lines} phrases from {Model.Count} states");
             if (lines < 1)
@@ -256,12 +270,12 @@ namespace MarkovSharp
 
             // If the start of the generated text has been seeded,
             // append that before generating the rest
-            if (seed != null && !seed.Equals(default(TPhrase)))
+            if (!seed.Equals(GetPrepadGram()))
             {
                 built.AddRange(SplitTokens(seed));
             }
 
-            while (true && built.Count < 1500)
+            while (built.Count < 1500)
             {
                 // Choose a new word to add from the model
                 //Logger.Info($"In Walkline loop: builtcount = {built.Count}");
@@ -304,7 +318,7 @@ namespace MarkovSharp
 
         // Pad out an array with empty strings from bottom up
         // Used when providing a seed sentence or word for generation
-        private TGram[] PadArrayLow<TGram>(TGram[] input)
+        private TGram[] PadArrayLow(TGram[] input)
         {
             if (input == null)
             {
@@ -326,7 +340,7 @@ namespace MarkovSharp
             }
             for (int i = Level - input.Length; i > 0; i--)
             {
-                p[i - 1] = default(TGram);
+                p[i - 1] = GetPrepadGram();
             }
 
             return p;

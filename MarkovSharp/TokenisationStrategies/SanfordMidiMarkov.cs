@@ -17,6 +17,16 @@ namespace MarkovSharp.TokenisationStrategies
 
         public int Channel { get; set; }
 
+        public override Note GetTerminatorGram()
+        {
+            return null;
+        }
+
+        public override Note GetPrepadGram()
+        {
+            return new Note();
+        }
+
         public override IEnumerable<Note> SplitTokens(Track input)
         {
             return ParseTrack(input);
@@ -29,8 +39,8 @@ namespace MarkovSharp.TokenisationStrategies
             {
                 if (token != null)
                 {
-                    t.Insert(token.StartTime, new ChannelMessage(ChannelCommand.NoteOn, Channel, token.Pitch, token.Velocity));
-                    t.Insert(token.StartTime + token.Duration, new ChannelMessage(ChannelCommand.NoteOff, Channel, token.Pitch, 0));
+                    t.Insert(token.StartTime, new ChannelMessage(token.Command, Channel, token.Pitch, token.Velocity));
+                    t.Insert(token.StartTime + token.Duration, new ChannelMessage(token.Command, Channel, token.Pitch, 0));
                 }
             }
 
@@ -52,10 +62,10 @@ namespace MarkovSharp.TokenisationStrategies
                 if (midiEvent.MidiMessage.MessageType == MessageType.Channel)
                 {
                     var m = (ChannelMessage)midiEvent.MidiMessage;
-                    if (m.Command == ChannelCommand.NoteOn || m.Command == ChannelCommand.NoteOff)
+                    if (m.Command == ChannelCommand.NoteOn || m.Command == ChannelCommand.NoteOff || m.Command == ChannelCommand.ProgramChange  )
                     {
                         Channel = m.MidiChannel;
-                        notes.Add(new NoteEvent { Pitch = m.Data1, Velocity = m.Data2, TimeStamp = midiEvent.AbsoluteTicks });
+                        notes.Add(new NoteEvent { Pitch = m.Data1, Velocity = m.Data2, TimeStamp = midiEvent.AbsoluteTicks, Command = m.Command});
                     }
                 }
             }
@@ -78,32 +88,49 @@ namespace MarkovSharp.TokenisationStrategies
                     continue;
                 }
 
-                for (int j = 0; j < noteArray.Length; j++)
-                {
-                    if (noteArray[j]?.Pitch == current?.Pitch && noteArray[j]?.Velocity == 0)
-                    {
-                        var paired = noteArray[j];
-                        //paired.Dump($"paired ({j})");
 
-                        if (paired != null)
+                if (current.Command == ChannelCommand.NoteOn)
+                {
+                    // collect and remove the corresponding note off message
+                    for (int j = 0; j < noteArray.Length; j++)
+                    {
+                        if (noteArray[j]?.Pitch == current?.Pitch && noteArray[j]?.Velocity == 0)
                         {
-                            builtList.Add(new Note
+                            var paired = noteArray[j];
+                            //paired.Dump($"paired ({j})");
+
+                            if (paired != null)
                             {
-                                Pitch = current.Pitch,
-                                Velocity = current.Velocity,
-                                Duration = paired.TimeStamp - current.TimeStamp,
-                                StartTime = current.TimeStamp
-                            });
-                            noteArray[j] = null;
-                            noteArray[i] = null;
+                                builtList.Add(new Note
+                                {
+                                    Pitch = current.Pitch,
+                                    Velocity = current.Velocity,
+                                    Duration = paired.TimeStamp - current.TimeStamp,
+                                    StartTime = current.TimeStamp,
+                                    Command = current.Command
+                                });
+                                noteArray[j] = null;
+                                noteArray[i] = null;
+                            }
+                            else
+                            {
+                                //current.Dump();
+                                throw new Exception("Pair not found for note event");
+                            }
+                            break;
                         }
-                        else
-                        {
-                            //current.Dump();
-                            throw new Exception("Pair not found for note event");
-                        }
-                        break;
                     }
+                }
+                else
+                {
+                    builtList.Add(new Note
+                    {
+                        Command = current.Command,
+                        Duration = 0,
+                        Pitch = current.Pitch,
+                        StartTime = current.TimeStamp,
+                        Velocity = current.Velocity
+                    });
                 }
             }
 
@@ -117,6 +144,41 @@ namespace MarkovSharp.TokenisationStrategies
         public int Pitch { get; set; }
         public int Velocity { get; set; }
         public int TimeStamp { get; set; }
+        public ChannelCommand Command { get; set; }
+
+        public override bool Equals(object o)
+        {
+            var x = o as NoteEvent;
+            if (x == null && this != null)
+            {
+                return false;
+            }
+
+            var equals =
+            (
+                this.Pitch == x.Pitch
+                &&
+                ((Velocity != 0 && x.Velocity != 0) || (Velocity == 0 && x.Velocity == 0))
+                &&
+                Command == x.Command
+            );
+
+            return equals;
+        }
+
+        /*
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 17;
+                hash = hash * 23 + Pitch.GetHashCode();
+                hash = hash * 7 + (Velocity == 0).GetHashCode();
+                //hash = hash * 23 + Duration.GetHashCode();
+                return hash;
+            }
+        }
+        */
     }
 
     public class Note : IComparable
@@ -125,6 +187,7 @@ namespace MarkovSharp.TokenisationStrategies
         public int Velocity { get; set; }
         public int Duration { get; set; }
         public int StartTime { get; set; }
+        public ChannelCommand Command { get; set; }
 
         public override bool Equals(object o)
         {
