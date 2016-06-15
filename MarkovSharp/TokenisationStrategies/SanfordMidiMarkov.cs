@@ -34,13 +34,19 @@ namespace MarkovSharp.TokenisationStrategies
 
         public override Track RebuildPhrase(IEnumerable<Note> tokens)
         {
+            // timing reconstructing the phrase makes a big difference currently
+            // we need to set the position (start) of a note dynamically, as otherwise
+            // notes will be placed exactly in the arrangement where they were before,
+            // just with some missing.
             var t = new Track();
+            int pos = 0;
             foreach (var token in tokens)
             {
                 if (token != null)
                 {
-                    t.Insert(token.StartTime, new ChannelMessage(token.Command, Channel, token.Pitch, token.Velocity));
-                    t.Insert(token.StartTime + token.Duration, new ChannelMessage(token.Command, Channel, token.Pitch, 0));
+                    t.Insert((pos * 150), new ChannelMessage(token.Command, Channel, token.Pitch, token.Velocity));
+                    t.Insert(Math.Abs((pos * 150) + token.Duration), new ChannelMessage(token.Command, Channel, token.Pitch, 0));
+                    pos++;
                 }
             }
 
@@ -55,7 +61,7 @@ namespace MarkovSharp.TokenisationStrategies
             }
 
             List<NoteEvent> notes = new List<NoteEvent>();
-
+            
             for (int i = 0; i < track.Count; i++)
             {
                 var midiEvent = track.GetMidiEvent(i);
@@ -165,8 +171,7 @@ namespace MarkovSharp.TokenisationStrategies
 
             return equals;
         }
-
-        /*
+        
         public override int GetHashCode()
         {
             unchecked
@@ -178,7 +183,6 @@ namespace MarkovSharp.TokenisationStrategies
                 return hash;
             }
         }
-        */
     }
 
     public class Note : IComparable
