@@ -40,12 +40,14 @@ namespace MarkovSharp.TokenisationStrategies
             // just with some missing.
             var t = new Track();
             int pos = 0;
+            
             foreach (var token in tokens)
             {
                 if (token != null)
                 {
-                    t.Insert((pos * 150), new ChannelMessage(token.Command, Channel, token.Pitch, token.Velocity));
-                    t.Insert(Math.Abs((pos * 150) + token.Duration), new ChannelMessage(token.Command, Channel, token.Pitch, 0));
+                    pos = pos + token.TimeSinceLastEvent;
+                    t.Insert(Math.Abs(pos), new ChannelMessage(token.Command, Channel, token.Pitch, token.Velocity));
+                    t.Insert(Math.Abs(pos + token.Duration), new ChannelMessage(token.Command, Channel, token.Pitch, 0));
                     pos++;
                 }
             }
@@ -85,6 +87,9 @@ namespace MarkovSharp.TokenisationStrategies
             List<Note> builtList = new List<Note>();
 
             var noteArray = notes.ToArray();
+
+            int lastTimestamp = 0;
+
             for (int i = 0; i < noteArray.Length; i++)
             {
                 var current = noteArray[i];
@@ -113,7 +118,8 @@ namespace MarkovSharp.TokenisationStrategies
                                     Velocity = current.Velocity,
                                     Duration = paired.TimeStamp - current.TimeStamp,
                                     StartTime = current.TimeStamp,
-                                    Command = current.Command
+                                    Command = current.Command,
+                                    TimeSinceLastEvent = current.TimeStamp - lastTimestamp
                                 });
                                 noteArray[j] = null;
                                 noteArray[i] = null;
@@ -135,9 +141,12 @@ namespace MarkovSharp.TokenisationStrategies
                         Duration = 0,
                         Pitch = current.Pitch,
                         StartTime = current.TimeStamp,
-                        Velocity = current.Velocity
+                        Velocity = current.Velocity,
+                        TimeSinceLastEvent = current.TimeStamp - lastTimestamp
                     });
                 }
+
+                lastTimestamp = current.TimeStamp;
             }
 
             return builtList;
@@ -191,6 +200,7 @@ namespace MarkovSharp.TokenisationStrategies
         public int Velocity { get; set; }
         public int Duration { get; set; }
         public int StartTime { get; set; }
+        public int TimeSinceLastEvent { get; set; }
         public ChannelCommand Command { get; set; }
 
         public override bool Equals(object o)

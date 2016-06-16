@@ -124,7 +124,7 @@ namespace MarkovSharp
             // when learning in future
             if (!SourceLines.Contains(phrase))
             {
-                Logger.Info($"Adding phrase {phrase} to source lines");
+                Logger.Debug($"Adding phrase {phrase} to source lines");
                 SourceLines.Add(phrase);
             }
             
@@ -140,12 +140,12 @@ namespace MarkovSharp
                 try
                 {
                     previous = tokens[tokens.Length - j];
-                    Logger.Info($"Adding TGram {previous} to lastCol");
+                    Logger.Debug($"Adding TGram {previous} to lastCol");
                     lastCol.Add(previous);
                 }
                 catch (IndexOutOfRangeException e)
                 {
-                    Logger.Info($"Caught an exception: {e}");
+                    Logger.Warn($"Caught an exception: {e}");
                     previous = GetPrepadGram();
                     lastCol.Add(previous);
                 }

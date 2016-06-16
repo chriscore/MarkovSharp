@@ -21,19 +21,22 @@ namespace MarkovSharp.Tests
             Sequence sNew = new Sequence(s.Division);
 
             var trackNumbers = s.Count;
-            for (int i = 1; i < trackNumbers; i++)
+            for (int i = 0; i < trackNumbers; i++)
             {
                 Track t = s[i];
-                SanfordMidiMarkov model = new SanfordMidiMarkov(2);
-                model.EnsureUniqueWalk = true;
+                var model = new SanfordMidiMarkov(100)
+                {
+                    EnsureUniqueWalk = true
+                };
+
                 model.Learn(t);
 
-                var result = model.Walk(10);
-
-                var built = result.OrderBy(a => Guid.NewGuid()).FirstOrDefault();
+                var built = model.Walk(10)
+                    .OrderBy(a => Guid.NewGuid()).FirstOrDefault();
                 
                 sNew.Add(built);
             }
+
             sNew.Save("swarsNew.mid");
         }
 
