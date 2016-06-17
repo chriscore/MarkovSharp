@@ -23,7 +23,7 @@ namespace MarkovSharp
     /// </summary>
     /// <typeparam name="TPhrase"></typeparam>
     /// <typeparam name="TGram"></typeparam>
-    public class GenericMarkov<TPhrase, TGram> : IMarkovModel<TPhrase, TGram>
+    public class GenericMarkov<TPhrase, TGram> : IMarkovStrategy<TPhrase, TGram>
     {
         private readonly ILog Logger = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
@@ -238,7 +238,7 @@ namespace MarkovSharp
 
             var sentences = new List<TPhrase>();
 
-            //for (var z = 0; z < lines; z++)
+            //for (var z = 0; z < lines; z++)k
             int genCount = 0;
             int created = 0;
             while (created < lines)
@@ -356,7 +356,7 @@ namespace MarkovSharp
         }
 
         // Load a model which has been saved
-        public IMarkovModel<TPhrase, TGram> Load(string file, int level = 1)
+        public IMarkovStrategy<TPhrase, TGram> Load(string file, int level = 1)
         {
             Logger.Info($"Loading model from {file}");
             var model = JsonConvert.DeserializeObject<GenericMarkov<TPhrase, TGram>>(File.ReadAllText(file));

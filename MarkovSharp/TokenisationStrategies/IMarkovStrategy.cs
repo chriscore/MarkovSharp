@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace MarkovSharp.TokenisationStrategies
 {
-    public interface IMarkovModel<TPhrase, TGram>
+    public interface IMarkovStrategy<TPhrase, TGram>
     {
         IEnumerable<TGram> SplitTokens(TPhrase input);
         
@@ -24,7 +24,7 @@ namespace MarkovSharp.TokenisationStrategies
         
         void Save(string file);
         
-        IMarkovModel<TPhrase, TGram> Load(string file, int level = 1);
+        IMarkovStrategy<TPhrase, TGram> Load(string file, int level = 1);
 
         TGram GetTerminatorGram();
 
