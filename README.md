@@ -12,7 +12,7 @@ Alternatively, just pull and build the class library to get going.
 
 This repo has a file containing some training data with famous quotes to use and test with.
 
-### Usage (strings)
+### Using the StringMarkov Strategy
 ```
 	// Some training data
 	var lines = new string[]
@@ -33,6 +33,36 @@ This repo has a file containing some training data with famous quotes to use and
 
 	// Output:
 	// Frankly, my dear, I don't give a box of their possessions. 
+```
+
+### Using the SanfordMidiMarkov Strategy
+```
+	var midiFile = "C:/Users/currentUser/Desktop/mySong.mid";
+
+	Sequence seq = new Sequence(midiFile);
+	Sequence seqNew = new Sequence(seq.Division);
+
+	// Get a random track to learn from
+	// Take more to produce output on multiple tracks.
+	var ints = Enumerable.Range(0, seq.Count).OrderBy(a => Guid.NewGuid()).Take(1);
+	foreach(int i in ints)
+	{
+		Track t = seq[i];
+		SanfordMidiMarkov model = new SanfordMidiMarkov(2);
+		model.EnsureUniqueWalk = true;
+		
+		// Learn the track
+		model.Learn(t);
+
+		// Walk the model
+		var result = model.Walk().FirstOrDefault();
+
+		// Add the result to the new sequence
+		seqNew.Add(result);
+	}
+	
+	// Write a new midi file
+	seqNew.Save("C:/Users/chriscore/Desktop/myNewSong.mid");
 ```
 
 ### Strategies (Extensibility)
