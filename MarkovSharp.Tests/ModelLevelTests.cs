@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using MarkovSharp.Tests;
 using MarkovSharp.TokenisationStrategies;
 using NUnit.Framework;
@@ -21,8 +16,7 @@ namespace MarkovSharp
             model.Learn(ExampleData);
             model.Save(ModelFileName);
 
-            var model2 = model.Load(ModelFileName);
-            var loaded = model2 as StringMarkov;
+            var loaded = model.Load<StringMarkov>(ModelFileName);
             Assert.AreEqual(1, loaded.Level);
         }
 
@@ -34,8 +28,7 @@ namespace MarkovSharp
             model.Learn(ExampleData);
             model.Save(ModelFileName);
 
-            var model2 = model.Load(ModelFileName, 2);
-            var loaded = model2 as StringMarkov;
+            var loaded = model.Load<StringMarkov>(ModelFileName, 2);
             Assert.AreEqual(2, loaded.Level);
         }
 

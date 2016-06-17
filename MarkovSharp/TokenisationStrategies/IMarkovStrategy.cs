@@ -23,8 +23,8 @@ namespace MarkovSharp.TokenisationStrategies
         List<TGram> GetMatches(TPhrase input);
         
         void Save(string file);
-        
-        IMarkovStrategy<TPhrase, TGram> Load(string file, int level = 1);
+
+        T Load<T>(string file, int level = 1) where T : IMarkovStrategy<TPhrase, TGram>;
 
         TGram GetTerminatorGram();
 

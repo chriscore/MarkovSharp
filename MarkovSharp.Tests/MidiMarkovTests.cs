@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using MarkovSharp.TokenisationStrategies;
 using NUnit.Framework;
 using Sanford.Multimedia.Midi;
@@ -12,6 +9,7 @@ namespace MarkovSharp.Tests
     [TestFixture]
     public class MidiMarkovTests
     {
+        /*
         [Test]
         public void Testcase()
         {
@@ -39,6 +37,7 @@ namespace MarkovSharp.Tests
 
             sNew.Save("swarsNew.mid");
         }
+        */
 
         [Test]
         public void NoteEquals()

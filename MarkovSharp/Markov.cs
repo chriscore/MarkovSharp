@@ -140,7 +140,7 @@ namespace MarkovSharp
                 try
                 {
                     previous = tokens[tokens.Length - j];
-                    Logger.Debug($"Adding TGram {previous} to lastCol");
+                    Logger.Debug($"Adding TGram ({typeof(TGram)}) {previous} to lastCol");
                     lastCol.Add(previous);
                 }
                 catch (IndexOutOfRangeException e)
@@ -151,7 +151,7 @@ namespace MarkovSharp
                 }
             }
 
-            Logger.Info($"Reached final key for phrase {phrase}");
+            Logger.Debug($"Reached final key for phrase {phrase}");
             var finalKey = new SourceGrams<TGram>(lastCol.ToArray());
             AddOrCreate(finalKey, GetTerminatorGram());
         }
@@ -356,19 +356,23 @@ namespace MarkovSharp
         }
 
         // Load a model which has been saved
-        public IMarkovStrategy<TPhrase, TGram> Load(string file, int level = 1)
+        public T Load<T>(string file, int level = 1) where T : IMarkovStrategy<TPhrase, TGram>
         {
             Logger.Info($"Loading model from {file}");
-            var model = JsonConvert.DeserializeObject<GenericMarkov<TPhrase, TGram>>(File.ReadAllText(file));
+            var model = JsonConvert.DeserializeObject<T>(File.ReadAllText(file));
 
             Logger.Info($"Model data loaded successfully");
             Logger.Info($"Assigning new model parameters");
-            Model = model.Model;
-            SourceLines = model.SourceLines;
-            Retrain(level);
-            
-            Logger.Info($"Loaded level {model.Level} model with {model.SourceLines.Count} lines of training data");
-            return this;
+
+            model.Retrain(level);
+
+            return model;
+            //Model = model.Model;
+            //SourceLines = model.SourceLines;
+            //Retrain(level);
+
+            //Logger.Info($"Loaded level {model.Level} model with {model.SourceLines.Count} lines of training data");
+            //return this;
         }
     }
 

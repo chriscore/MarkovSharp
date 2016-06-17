@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using log4net;
 using MarkovSharp.TokenisationStrategies;
 using Newtonsoft.Json;
@@ -22,8 +18,7 @@ namespace MarkovSharp.Tests
             var model = new StringMarkov();
             model.Save(ModelFileName);
             
-            var forLoading = new StringMarkov();
-            var newmodel = forLoading.Load(ModelFileName, model.Level);
+            var forLoading = new StringMarkov().Load<StringMarkov>(ModelFileName, model.Level);
 
             Assert.AreEqual(model.Level, forLoading.Level);
             Assert.AreEqual(model.SourceLines, forLoading.SourceLines);
@@ -36,8 +31,7 @@ namespace MarkovSharp.Tests
             model.Learn(ExampleData);
             model.Save(ModelFileName);
 
-            var forLoading = new StringMarkov();
-            var newmodel = forLoading.Load(ModelFileName, model.Level);
+            var forLoading = new StringMarkov().Load<StringMarkov>(ModelFileName, model.Level);
 
             Assert.AreEqual(model.Level, forLoading.Level);
             Assert.AreEqual(model.SourceLines, forLoading.SourceLines);
@@ -76,8 +70,7 @@ namespace MarkovSharp.Tests
             model.Learn(ExampleData);
             model.Save(ModelFileName);
 
-            var forLoading = new StringMarkov();
-            var newmodel = forLoading.Load(ModelFileName, newLevel);
+            var forLoading = new StringMarkov().Load<StringMarkov>(ModelFileName, newLevel);
 
             Assert.AreEqual(newLevel, forLoading.Level);
             Assert.AreEqual(model.SourceLines, forLoading.SourceLines);
@@ -92,10 +85,9 @@ namespace MarkovSharp.Tests
             model.Learn(ExampleData);
             model.Save(ModelFileName);
 
-            var forLoading = new StringMarkov();
-            var newmodel = forLoading.Load(ModelFileName);
+            var newModel = new StringMarkov().Load<StringMarkov>(ModelFileName);
             
-            var lines = newmodel.Walk();
+            var lines = newModel.Walk();
 
             Logger.Info(string.Join("\r\n", lines));
             Assert.AreEqual(1, lines.Count());
