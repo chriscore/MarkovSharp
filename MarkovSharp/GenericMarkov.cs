@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using log4net;
 using MarkovSharp.TokenisationStrategies;
 using Newtonsoft.Json;
+using MarkovSharp.Models;
 
 [assembly: log4net.Config.XmlConfigurator(ConfigFile = "log4net.config", Watch = true)]
 
@@ -16,14 +17,14 @@ namespace MarkovSharp
 {
     /// <summary>
     /// This class contains core functionality of the generic Markov model.
-    /// Probably shouldn't be used directly, instead, extend GenericMarkov 
+    /// Shouldn't be used directly, instead, extend GenericMarkov 
     /// and implement the IMarkovModel interface - this will allow you to 
     /// define overrides for SplitTokens and RebuildPhrase, which is generally
     /// all that should be needed for implementation of a new model type.
     /// </summary>
     /// <typeparam name="TPhrase"></typeparam>
     /// <typeparam name="TGram"></typeparam>
-    public class GenericMarkov<TPhrase, TGram> : IMarkovStrategy<TPhrase, TGram>
+    public abstract class GenericMarkov<TPhrase, TGram> : IMarkovStrategy<TPhrase, TGram>
     {
         private readonly ILog Logger = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
@@ -62,20 +63,11 @@ namespace MarkovSharp
         /// </summary>
         /// <param name="tokens"></param>
         /// <returns></returns>
-        public virtual TPhrase RebuildPhrase(IEnumerable<TGram> tokens)
-        {
-            throw new ArgumentException("Please do not use GenericMarkov directly - instead, inherit from GenericMarkov and extend SplitTokens and RebuildPhrase methods. An interface IMarkovModel is provided for ease of use.");
-        }
+        public abstract TPhrase RebuildPhrase(IEnumerable<TGram> tokens);
 
-        public virtual TGram GetTerminatorGram()
-        {
-            throw new NotImplementedException();
-        }
+        public abstract TGram GetTerminatorGram();
 
-        public virtual TGram GetPrepadGram()
-        {
-            throw new NotImplementedException();
-        }
+        public abstract TGram GetPrepadGram();
 
         /// <summary>
         /// Set to true to ensure that all lines generated are different and not same as the training data.
@@ -373,48 +365,6 @@ namespace MarkovSharp
 
             //Logger.Info($"Loaded level {model.Level} model with {model.SourceLines.Count} lines of training data");
             //return this;
-        }
-    }
-
-    public class SourceGrams<T>
-    {
-        public T[] Before { get; set; }
-
-        public SourceGrams(params T[] args)
-        {
-            Before = args;
-        }
-
-        public override bool Equals(object o)
-        {
-            var x = o as SourceGrams<T>;
-
-            if (x == null && this != null)
-            {
-                return false;
-            }
-            
-            var equals = Before.OrderBy(a => a).ToArray().SequenceEqual(x.Before.OrderBy(a => a).ToArray());
-            return equals;
-        }
-
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                int hash = 17;
-                var defaultVal = default(T);
-                foreach (var member in Before.Where(a => a != null && !a.Equals(defaultVal)))
-                {
-                    hash = hash * 23 + member.GetHashCode();
-                }
-                return hash;
-            }
-        }
-
-        public override string ToString()
-        {
-            return JsonConvert.SerializeObject(Before);
         }
     }
 }

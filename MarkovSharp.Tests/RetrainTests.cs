@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using MarkovSharp.Models;
 using MarkovSharp.TokenisationStrategies;
 using NUnit.Framework;
 
