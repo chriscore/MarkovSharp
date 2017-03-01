@@ -58,6 +58,7 @@
     <Compile Include="TokenisationStrategies\IMarkovStrategy.cs" />
     <Compile Include="TokenisationStrategies\SanfordMidiMarkov.cs" />
     <Compile Include="TokenisationStrategies\StringMarkov.cs" />
+    <Compile Include="TokenisationStrategies\SubstringMarkov.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="lines.json" />

@@ -53,10 +53,7 @@ namespace MarkovSharp
         /// </summary>
         /// <param name="phrase"></param>
         /// <returns></returns>
-        public virtual IEnumerable<TGram> SplitTokens(TPhrase phrase)
-        {
-            throw new ArgumentException("Please do not use GenericMarkov directly - instead, inherit from GenericMarkov and extend SplitTokens and RebuildPhrase methods. An interface IMarkovModel is provided for ease of use.");
-        }
+        public abstract IEnumerable<TGram> SplitTokens(TPhrase phrase);
 
         /// <summary>
         /// Defines how to join ngrams back together to form a phrase
@@ -148,23 +145,30 @@ namespace MarkovSharp
             AddOrCreate(finalKey, GetTerminatorGram());
         }
 
+        /// <summary>
+        /// Iterate over a list of TGrams and store each of them in the model at a composite key genreated from its prior [Level] number of TGrams
+        /// </summary>
+        /// <param name="tokens"></param>
         private void LearnTokens(IReadOnlyList<TGram> tokens)
         {
             for (var i = 0; i < tokens.Count; i++)
             {
                 var current = tokens[i];
-
                 var previousCol = new List<TGram>();
+                
+                // From the current token's index, get hold of the previous [Level] number of tokens that came before it
                 for (var j = Level; j > 0; j--)
                 {
                     TGram previous;
                     try
                     {
+                        // this case addresses when we are at a token index less then the value of [Level], 
+                        // and we effectively would be looking at tokens before the beginning phrase
                         if (i - j < 0)
                         {
                             previousCol.Add(GetPrepadGram());
                         }
-                        else
+                        else 
                         {
                             previous = tokens[i - j];
                             previousCol.Add(previous);
@@ -177,11 +181,18 @@ namespace MarkovSharp
                     }
                 }
 
+                // create the composite key based on previous tokens
                 var key = new SourceGrams<TGram>(previousCol.ToArray());
+
+                // add the current token to the markov model at the composite key
                 AddOrCreate(key, current);
             }
         }
 
+        /// <summary>
+        /// Retrain an existing trained model instance to a different 'level'
+        /// </summary>
+        /// <param name="newLevel"></param>
         public void Retrain(int newLevel)
         {
             if (newLevel < 1)
@@ -200,6 +211,11 @@ namespace MarkovSharp
 
         private object lockObj = new object();
 
+        /// <summary>
+        /// Add a TGram to the markov models store with a composite key of the previous [Level] number of TGrams
+        /// </summary>
+        /// <param name="key">The composite key under which to add the TGram value</param>
+        /// <param name="value">The value to add to the store</param>
         private void AddOrCreate(SourceGrams<TGram> key, TGram value)
         {
             lock (lockObj)
@@ -215,6 +231,12 @@ namespace MarkovSharp
             }
         }
 
+        /// <summary>
+        /// Generate a collection of phrase output data based on the current model
+        /// </summary>
+        /// <param name="lines">The number of phrases to emit</param>
+        /// <param name="seed">Optionally provide the start of the phrase to generate from</param>
+        /// <returns></returns>
         public IEnumerable<TPhrase> Walk(int lines = 1, TPhrase seed = default(TPhrase))
         {
             if (seed == null)
@@ -251,6 +273,11 @@ namespace MarkovSharp
             }
         }
 
+        /// <summary>
+        /// Generate a single phrase of output data based on the current model
+        /// </summary>
+        /// <param name="seed">Optionally provide the start of the phrase to generate from</param>
+        /// <returns></returns>
         private TPhrase WalkLine(TPhrase seed)
         {
             var arraySeed = PadArrayLow(SplitTokens(seed)?.ToArray());
@@ -338,7 +365,10 @@ namespace MarkovSharp
             return p;
         }
 
-        // Save the model to file for use later
+        /// <summary>
+        /// Save the model to file for use later
+        /// </summary>
+        /// <param name="file">The path to a file to store the model in</param>
         public void Save(string file)
         {
             Logger.Info($"Saving model with {this.Model.Count} model values");
@@ -347,7 +377,13 @@ namespace MarkovSharp
             Logger.Info($"Model saved successfully");
         }
 
-        // Load a model which has been saved
+        /// <summary>
+        /// Load a model which has been saved
+        /// </summary>
+        /// <typeparam name="T">The type of markov model to load the data as</typeparam>
+        /// <param name="file">The path to a file containing saved model data</param>
+        /// <param name="level">The level to apply to the loaded model (model will be trained on load)</param>
+        /// <returns></returns>
         public T Load<T>(string file, int level = 1) where T : IMarkovStrategy<TPhrase, TGram>
         {
             Logger.Info($"Loading model from {file}");
