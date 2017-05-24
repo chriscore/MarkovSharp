@@ -13,4 +13,7 @@
     <releaseNotes></releaseNotes>
     <tags>markov model machine learning text generation</tags>
   </metadata>
+  <files>
+	<file src="*.dll" target="build" />
+  </files>
 </package>
