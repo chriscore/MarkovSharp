@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <package >
   <metadata>
-    <id>MarkovSharp</id>
-    <version>1.0.1</version>
-    <title>MarkovSharp</title>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>$title$</title>
     <authors>Chris Core</authors>
     <owners>Chris Core</owners>
     <licenseUrl>https://github.com/chriscore/MarkovSharp/blob/master/README.md</licenseUrl>
