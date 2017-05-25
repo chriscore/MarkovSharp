@@ -2,8 +2,11 @@
 
 [![chriscore MyGet Build Status](https://www.myget.org/BuildSource/Badge/chriscore?identifier=2e1ed033-4736-4537-9a85-1ad807bf13c3)](https://www.myget.org/)
 
-An easy to use C# implementation of an N-state Markov model. 
+An easy to use C# implementation of an N-state Markov model.
 MarkovSharp exposes the notion of a model strategy, which allows you to use pre-defined model strategies, or create your own.
+
+##Interactive Predictive Text Example
+Go here to try out an example ASP.NET site which uses a MarkovSharp based backend API to easily provide predictive text functionality when given some trained text: http://markovsharp.azurewebsites.net/ 
 
 ## Getting Started
 
@@ -32,7 +35,7 @@ This repo has a file containing some training data with famous quotes to use and
 	Console.WriteLine(model.Walk().First());
 
 	// Output:
-	// Frankly, my dear, I don't give a box of their possessions. 
+	// Frankly, my dear, I don't give a box of their possessions.
 ```
 
 ### Using the SanfordMidiMarkov Strategy
@@ -50,7 +53,7 @@ This repo has a file containing some training data with famous quotes to use and
 		Track t = seq[i];
 		SanfordMidiMarkov model = new SanfordMidiMarkov(2);
 		model.EnsureUniqueWalk = true;
-		
+
 		// Learn the track
 		model.Learn(t);
 
@@ -60,7 +63,7 @@ This repo has a file containing some training data with famous quotes to use and
 		// Add the result to the new sequence
 		seqNew.Add(result);
 	}
-	
+
 	// Write a new midi file
 	seqNew.Save("C:/Users/chriscore/Desktop/myNewSong.mid");
 ```
@@ -89,7 +92,7 @@ If you have a data type that needs processing differently, a similar approach to
         public StringMarkov(int level = 2)
             : base(level)
         { }
-		
+
 		// Define how to split a phrase to collection of tokens
         public override IEnumerable<string> SplitTokens(string input)
         {
