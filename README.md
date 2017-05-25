@@ -7,6 +7,7 @@ MarkovSharp exposes the notion of a model strategy, which allows you to use pre-
 
 ## Interactive Predictive Text Example
 Go here to try out an example ASP.NET site which uses a MarkovSharp based backend API to easily provide predictive text functionality when given some trained text: http://markovsharp.azurewebsites.net/
+The site is included in the MarkovSharp repo.
 
 ## Getting Started
 
