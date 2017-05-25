@@ -5,8 +5,8 @@
 An easy to use C# implementation of an N-state Markov model.
 MarkovSharp exposes the notion of a model strategy, which allows you to use pre-defined model strategies, or create your own.
 
-##Interactive Predictive Text Example
-Go here to try out an example ASP.NET site which uses a MarkovSharp based backend API to easily provide predictive text functionality when given some trained text: http://markovsharp.azurewebsites.net/ 
+## Interactive Predictive Text Example
+Go here to try out an example ASP.NET site which uses a MarkovSharp based backend API to easily provide predictive text functionality when given some trained text: http://markovsharp.azurewebsites.net/
 
 ## Getting Started
 
