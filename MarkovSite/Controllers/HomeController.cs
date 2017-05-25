@@ -1,4 +1,6 @@
 ﻿using MarkovSharp.TokenisationStrategies;
+using MarkovSite.Models;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -17,7 +19,7 @@ namespace MarkovSite.Controllers
 
         public ActionResult About()
         {
-            ViewBag.Message = "Your application description page.";
+            ViewBag.Message = "About!";
 
             return View();
         }
@@ -32,23 +34,28 @@ namespace MarkovSite.Controllers
         [HttpPost]
         public ActionResult Train()
         {
-            var model = new StringMarkov(1);
-
-            string text;
+            string requestData;
             using (Stream req = Request.InputStream)
             {
                 req.Seek(0, SeekOrigin.Begin);
-                text = new StreamReader(req).ReadToEnd();
+                requestData = new StreamReader(req).ReadToEnd();
             }
 
-            var lines = text.Split(new char[] { '\n', '.', '!', '?' }, StringSplitOptions.RemoveEmptyEntries);
+            var deserialisedRequestData = JsonConvert.DeserializeObject<TrainingRequest>(requestData);
+            var model = new StringMarkov(deserialisedRequestData.ModelLevel ?? 1);
+
+            var lines = deserialisedRequestData.TrainingData.Split(new char[] { '\n', '.', '!', '?' }, StringSplitOptions.RemoveEmptyEntries);
             model.Learn(lines);
 
             Session["Model"] = model;
 
             return new JsonResult()
             {
-                Data = $"Learnt {lines.Count()} lines of training data",
+                Data = new
+                {
+                    Message = $"Learnt {lines.Count()} lines of training data using level {model.Level}",
+                    Error = null as object
+                },
                 JsonRequestBehavior = JsonRequestBehavior.AllowGet
             };
         }
@@ -56,47 +63,52 @@ namespace MarkovSite.Controllers
         [HttpPost]
         public ActionResult GetPredictions()
         {
-            // this method is just a placeholder example
-
-            // TODO: use markovsharp nuget.
             if (Session["Model"] != null)
             {
                 var model = (StringMarkov)Session["Model"];
 
-                string text;
+                string json;
                 using (Stream req = Request.InputStream)
                 {
                     req.Seek(0, SeekOrigin.Begin);
-                    text = new StreamReader(req).ReadToEnd();
+                    json = new StreamReader(req).ReadToEnd();
                 }
+                var deserialisedResponse = JsonConvert.DeserializeObject<GetPredictionsRequest>(json);
 
-                if (string.IsNullOrEmpty(text))
+                if (string.IsNullOrEmpty(deserialisedResponse.SeedText))
                 {
-                    text = model.GetPrepadGram();
+                    deserialisedResponse.SeedText = model.GetPrepadGram();
                 }
 
                 try
                 {
-                    var suggestions = model.GetMatches(text.Trim())
+                    var suggestions = model.GetMatches(deserialisedResponse.SeedText.Trim())
                         .Where(a => 
-                            !string.IsNullOrWhiteSpace(a)
+                            a != model.GetPrepadGram()
                             && a != model.GetTerminatorGram()
                         )
                         .GroupBy(a => a)
                         .OrderByDescending(a => a.Count())
-                        .Select(a => a.Key);
+                        .Select(a => a.Key).ToArray();
 
                     return new JsonResult()
                     {
-                        Data = suggestions,
-                        JsonRequestBehavior = JsonRequestBehavior.AllowGet
+                        Data = new
+                        {
+                            Suggestions = suggestions,
+                            Error = null as object
+                        },
                     };
                 }
-                catch(Exception)
+                catch(Exception e)
                 {
                     return new JsonResult()
                     {
-                        Data = new string[] { "-", "-", "-" }
+                        Data = new
+                        {
+                            Suggestions = new string[] { },
+                            Error = e.Message
+                        },
                     };
                 }
             }
@@ -104,7 +116,11 @@ namespace MarkovSite.Controllers
             {
                 return new JsonResult()
                 {
-                    Data = new string[] { "-", "-", "-" }
+                    Data = new
+                    {
+                        Suggestions = new string[] { },
+                        Error = "No Markov model was found in session, please try training data again"
+                    },
                 };
             }
         }

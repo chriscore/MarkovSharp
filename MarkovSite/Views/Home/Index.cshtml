@@ -11,26 +11,44 @@
 </div>
 
 <div class="row">
-        <h2>1) Train a Model</h2>
-        <p>
-            Enter training data for the model here, then click train.
-        </p>
-        <p>
-            <textarea id="training-input" class="input-sm col-md-12"></textarea>
-        </p>
-        <p>
-            <button id="train-button" onclick="Train()" class="col-md-12">Train!</button>
-        </p>
+    <div class="panel panel-info">
+        <div class="panel-heading">
+            <h3>1) Train a Model</h3>
+        </div>
+        <div class="panel-body">
+
+            <p>
+                <h4>Model level</h4>
+                How many previous words to consider for creating predictions: <input type="number" id="markov-level" min="1" max="3" step="1" value="1">
+            </p>
+            <p>
+                <h4>Training Text</h4>
+                Enter training text below then click 'Train!'<br />
+                <small><i>Recommended: At least a few hundred words, written as sentences separated by new lines or punctuation</i></small><br />
+                <textarea id="training-input" class="input-sm col-md-12"></textarea>
+            </p>
+            <p>
+                <button id="train-button" onclick="Train()" class="col-md-12">Train!</button>
+            </p>
+
+        </div>
+    </div>
 </div>
 <div class="row">
-        <h2>2) Try it out</h2>
-        <p>Type text in below and optionally choose suggested predictions.</p>
-        <p>
-            <textarea id="testing-input" class="input-lg col-md-12"></textarea>
-        </p>
-        <p>
-            <button id="suggestion-1" class="col-md-4">-</button>
-            <button id="suggestion-2" class="col-md-4">-</button>
-            <button id="suggestion-3" class="col-md-4">-</button>
-        </p>
+    <div class="panel panel-info">
+        <div class="panel-heading">
+            <h3>2) Try it out</h3>
+        </div>
+        <div class="panel-body">
+            <p>Type text in below and optionally choose suggested predictions.</p>
+            <p>
+                <textarea id="testing-input" class="input-lg col-md-12"></textarea>
+            </p>
+            <p>
+                <button id="suggestion-1" class="col-md-4">-</button>
+                <button id="suggestion-2" class="col-md-4">-</button>
+                <button id="suggestion-3" class="col-md-4">-</button>
+            </p>
+        </div>
+    </div>
 </div>

@@ -1,18 +1,8 @@
-﻿//setup before functions
-var typingTimer;               //timer identifier
+﻿var typingTimer;               //timer identifier
 var doneTypingInterval = 200;  //time in ms, 5 second for example
 var $trainingArea = $('#training-input');
 var $input = $('#testing-input');
-
-function Train() {
-    console.log('training model');
-    var txt = $trainingArea.val();
-
-    $.post("/Home/Train", txt, function (data) {
-        console.log(data);
-        GetNextPredictions();
-    });
-}
+var $levelNum = $('#markov-level');
 
 //on keyup, start the countdown
 $input.on('keyup', function () {
@@ -58,17 +48,53 @@ function insertChoice($element) {
     }
 }
 
+function Train() {
+    var level = $levelNum.val();
+    console.log('training model with level ' + level);
+    var txt = $trainingArea.val();
+
+    var trainingPostData = {
+        modelLevel: level,
+        trainingData: txt
+    };
+    console.log(trainingPostData);
+
+    jQuery.ajax({
+        url: "/Home/Train",
+        type: "POST",
+        data: JSON.stringify(trainingPostData),
+        dataType: "json",
+        contentType: "application/json; charset=utf-8",
+        success: function (data) {
+            console.log(data.Message);
+            GetNextPredictions();
+        }
+    });
+}
+
 //user is finished typing, get predictions
 function GetNextPredictions() {
     console.log('getting predictions');
-    var txt = $input.val();
 
-    $.post("/Home/GetPredictions", txt, function (data)
-    {
-        console.log(data);
+    var seedText = $input.val();
 
-        $("#suggestion-1").html(data[0] || '-');
-        $("#suggestion-2").html(data[1] || '-');
-        $("#suggestion-3").html(data[2] || '-');
+    var postBody = {
+        seedText: seedText
+    };
+    console.log(postBody);
+
+    jQuery.ajax({
+        url: "/Home/GetPredictions",
+        type: "POST",
+        data: JSON.stringify(postBody),
+        dataType: "json",
+        contentType: "application/json; charset=utf-8",
+        success: function (data) {
+            console.log(data);
+
+            $("#suggestion-1").html(data.Suggestions[0] || '-');
+            $("#suggestion-2").html(data.Suggestions[1] || '-');
+            $("#suggestion-3").html(data.Suggestions[2] || '-');
+        }
     });
 }
