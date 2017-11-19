@@ -2,6 +2,13 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard1.3</TargetFramework>
+    <Authors>Chris Core</Authors>
+    <Company>Chris Corporation</Company>
+    <PackageLicenseUrl>https://github.com/chriscore/MarkovSharp/blob/master/README.md</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/chriscore/MarkovSharp</PackageProjectUrl>
+    <Description>An easy to use C# implementation of an N-state Markov model.</Description>
+    <PackageTags>markov model machine learning text generation</PackageTags>
+    <Version>2.2.0</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

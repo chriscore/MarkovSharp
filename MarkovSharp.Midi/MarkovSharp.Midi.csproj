@@ -41,6 +41,7 @@
     <Compile Include="SanfordMidiMarkov.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="MarkovSharp.Midi.nuspec" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
