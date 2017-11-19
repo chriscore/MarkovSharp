@@ -7,41 +7,26 @@ namespace MarkovSharp.Models
     {
         public T[] Before { get; }
 
-        public SourceGrams(params T[] args)
-        {
-            Before = args;
-        }
+        public SourceGrams(params T[] args) => Before = args;
 
         public override bool Equals(object o)
         {
             var x = o as SourceGrams<T>;
+            if (x == null) return false;
 
-            if (x == null)
-            {
-                return false;
-            }
-
-            var equals = Before.OrderBy(a => a).ToArray().SequenceEqual(x.Before.OrderBy(a => a).ToArray());
-            return equals;
+            return Before.OrderBy(a => a)
+                .SequenceEqual(x.Before.OrderBy(a => a));
         }
 
         public override int GetHashCode()
         {
             unchecked
             {
-                var hash = 17;
-                var defaultVal = default(T);
-                foreach (var member in Before.Where(a => a != null && !a.Equals(defaultVal)))
-                {
-                    hash = hash * 23 + member.GetHashCode();
-                }
-                return hash;
+                return Before.Where(a => a != null && !a.Equals(default(T)))
+                    .Aggregate(17, (current, member) => current * 23 + member.GetHashCode());
             }
         }
 
-        public override string ToString()
-        {
-            return JsonConvert.SerializeObject(Before);
-        }
+        public override string ToString() => JsonConvert.SerializeObject(Before);
     }
 }

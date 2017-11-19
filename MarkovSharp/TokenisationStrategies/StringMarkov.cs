@@ -5,36 +5,19 @@ namespace MarkovSharp.TokenisationStrategies
     public class StringMarkov : GenericMarkov<string, string>
     {
         public StringMarkov()
-            : this(2)
-        { }
+            : this(2) { }
 
         public StringMarkov(int level)
-            : base(level)
-        { }
+            : base(level) { }
 
-        public override IEnumerable<string> SplitTokens(string input)
-        {
-            if (input == null)
-            {
-                return new List<string> { GetPrepadGram() };
-            }
+        public override IEnumerable<string> SplitTokens(string input) => input == null 
+            ? (IEnumerable<string>) new List<string> {GetPrepadGram()} 
+            : input.Split(' ');
 
-            return input.Split(' ');
-        }
+        public override string RebuildPhrase(IEnumerable<string> tokens) => string.Join(" ", tokens);
 
-        public override string RebuildPhrase(IEnumerable<string> tokens)
-        {
-            return string.Join(" ", tokens);
-        }
+        public override string GetTerminatorGram() => null;
 
-        public override string GetTerminatorGram()
-        {
-            return null;
-        }
-
-        public override string GetPrepadGram()
-        {
-            return string.Empty;
-        }
+        public override string GetPrepadGram() => string.Empty;
     }
 }

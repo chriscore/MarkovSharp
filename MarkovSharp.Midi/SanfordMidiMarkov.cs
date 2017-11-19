@@ -7,33 +7,18 @@ namespace MarkovSharp.Midi
     public class SanfordMidiMarkov : GenericMarkov<Track, Note>
     {
         public SanfordMidiMarkov()
-            : this(2)
-        {
-            Channel = 1;
-        }
+            : this(2) { }
 
         public SanfordMidiMarkov(int level = 2)
-            : base(level)
-        {
-            Channel = 1;
-        }
+            : base(level) { }
 
-        public int Channel { get; set; }
+        public int Channel { get; set; } = 1;
 
-        public override Note GetTerminatorGram()
-        {
-            return null;
-        }
+        public override Note GetTerminatorGram() => null;
 
-        public override Note GetPrepadGram()
-        {
-            return new Note();
-        }
+        public override Note GetPrepadGram() => new Note();
 
-        public override IEnumerable<Note> SplitTokens(Track input)
-        {
-            return ParseTrack(input);
-        }
+        public override IEnumerable<Note> SplitTokens(Track input) => ParseTrack(input);
 
         public override Track RebuildPhrase(IEnumerable<Note> tokens)
         {
@@ -160,8 +145,11 @@ namespace MarkovSharp.Midi
     public class NoteEvent
     {
         public int Pitch { get; set; }
+
         public int Velocity { get; set; }
+
         public int TimeStamp { get; set; }
+
         public ChannelCommand Command { get; set; }
 
         public override bool Equals(object o)
