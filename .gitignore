@@ -31,3 +31,4 @@ node_modules/
 *.playlist
 TestResults/
 /.vs/MarkovSharp/v15/Server/sqlite3
+/.vs/config/applicationhost.config
