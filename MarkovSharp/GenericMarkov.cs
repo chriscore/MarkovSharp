@@ -5,9 +5,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Web.Script.Serialization;
 using MarkovSharp.TokenisationStrategies;
 using MarkovSharp.Models;
+using Newtonsoft.Json;
 
 namespace MarkovSharp
 {
@@ -37,7 +37,8 @@ namespace MarkovSharp
 
         // Dictionary containing the model data. The key is the N number of
         // previous words and value is a list of possible outcomes, given that key
-        [ScriptIgnore] public ConcurrentDictionary<SourceGrams<TGram>, List<TGram>> Model { get; set; }
+        [JsonIgnore]
+        public ConcurrentDictionary<SourceGrams<TGram>, List<TGram>> Model { get; set; }
 
         public List<TPhrase> SourceLines { get; set; }
 
@@ -278,7 +279,7 @@ namespace MarkovSharp
 
             // Allocate a queue to act as the memory, which is n 
             // levels deep of previous words that were used
-            var q = new Queue(arraySeed);
+            var q = new Queue<TGram>(arraySeed);
 
             // If the start of the generated text has been seeded,
             // append that before generating the rest
@@ -365,7 +366,7 @@ namespace MarkovSharp
         public void Save(string file)
         {
             Console.WriteLine($"Saving model with {this.Model.Count} model values");
-            var modelJson = new JavaScriptSerializer().Serialize(this);
+            var modelJson = JsonConvert.SerializeObject(this);
             File.WriteAllText(file, modelJson);
             Console.WriteLine($"Model saved successfully");
         }
@@ -380,7 +381,7 @@ namespace MarkovSharp
         public T Load<T>(string file, int level = 1) where T : IMarkovStrategy<TPhrase, TGram>
         {
             Console.WriteLine($"Loading model from {file}");
-            var model = new JavaScriptSerializer().Deserialize<T>(File.ReadAllText(file));
+            var model = JsonConvert.DeserializeObject<T>(File.ReadAllText(file));
 
             Console.WriteLine($"Model data loaded successfully");
             Console.WriteLine($"Assigning new model parameters");

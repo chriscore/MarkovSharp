@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>Chris Core</authors>
+    <owners>Chris Core</owners>
+    <licenseUrl>https://github.com/chriscore/MarkovSharp/blob/master/README.md</licenseUrl>
+    <projectUrl>https://github.com/chriscore/MarkovSharp</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>An easy to use C# implementation of an N-state Markov model.</description>
+    <releaseNotes></releaseNotes>
+    <tags>markov model machine learning text generation</tags>
+  </metadata>
+</package>

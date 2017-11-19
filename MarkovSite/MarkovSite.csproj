@@ -26,6 +26,7 @@
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
     <TargetFrameworkProfile />
+    <Use64BitIISExpress />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -225,7 +226,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MarkovSharp\MarkovSharp.csproj">
-      <Project>{d3003b4e-0007-43eb-b350-2410286c6db5}</Project>
+      <Project>{2dcca0e9-a57d-437e-b35d-64d44828ce24}</Project>
       <Name>MarkovSharp</Name>
     </ProjectReference>
   </ItemGroup>

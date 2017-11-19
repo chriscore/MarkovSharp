@@ -73,7 +73,7 @@
       <Name>MarkovSharp.Midi</Name>
     </ProjectReference>
     <ProjectReference Include="..\MarkovSharp\MarkovSharp.csproj">
-      <Project>{D3003B4E-0007-43EB-B350-2410286C6DB5}</Project>
+      <Project>{2dcca0e9-a57d-437e-b35d-64d44828ce24}</Project>
       <Name>MarkovSharp</Name>
     </ProjectReference>
   </ItemGroup>
