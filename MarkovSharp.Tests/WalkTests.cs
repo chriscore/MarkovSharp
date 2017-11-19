@@ -1,40 +1,38 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using log4net;
+using FluentAssertions;
 using MarkovSharp.TokenisationStrategies;
-using NUnit.Framework;
+using Xunit;
 
 namespace MarkovSharp.Tests
 {
-    [TestFixture]
     public class WalkTests : BaseMarkovTests
     {
-        private readonly ILog Logger = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-
-        [Test]
+        [Fact]
         public void BasicWalkOnTrainedModelGeneratesCorrectNumberOfLines()
         {
             var model = new StringMarkov();
             model.Learn(ExampleData);
             var result = model.Walk(1);
 
-            Assert.AreEqual(1, result.Count());
-            Logger.Info(result.First());
+            result.Should().HaveCount(1);
+            Console.WriteLine(result.First());
         }
 
-        [Test]
+        [Fact]
         public void WalkOnUntrainedModelIsEmpty()
         {
             var model = new StringMarkov();
             var result = model.Walk();
 
-            CollectionAssert.AreEqual(new List<string> { string.Empty }, result);
+            result.ShouldBeEquivalentTo(new List<string> { string.Empty });
         }
         
-        [TestCase(1)]
-        [TestCase(10)]
-        [TestCase(100)]
+        [Theory]
+        [InlineData(1)]
+        [InlineData(10)]
+        [InlineData(100)]
 
         public void WalkOnTrainedModelGeneratesCorrectNumberOfLines(int lineCount)
         {
@@ -42,12 +40,13 @@ namespace MarkovSharp.Tests
             model.Learn(ExampleData);
             var result = model.Walk(lineCount);
 
-            Assert.AreEqual(lineCount, result.Count());
+            result.Should().HaveCount(lineCount);
         }
 
-        [TestCase(int.MinValue)]
-        [TestCase(-1)]
-        [TestCase(0)]
+        [Theory]
+        [InlineData(int.MinValue)]
+        [InlineData(-1)]
+        [InlineData(0)]
         public void MustCallWalkWithPositiveInteger(int lineCount)
         {
             var model = new StringMarkov();
@@ -55,13 +54,14 @@ namespace MarkovSharp.Tests
             {
                 var x = model.Walk(lineCount).ToList();
             });
-            Assert.AreEqual("Invalid argument - line count for walk must be a positive integer\r\nParameter name: lines", ex.Message);
+            ex.Message.Should().Be("Invalid argument - line count for walk must be a positive integer\r\nParameter name: lines");
         }
 
-        [TestCase(1)]
-        [TestCase(10)]
-        [TestCase(100)]
-        [TestCase(1000)]
+        [Theory]
+        [InlineData(1)]
+        [InlineData(10)]
+        [InlineData(100)]
+        [InlineData(1000)]
         public void WalkCreatesNewContent(int walkCount)
         {
             var model = new StringMarkov();
@@ -69,16 +69,16 @@ namespace MarkovSharp.Tests
             model.EnsureUniqueWalk = true;
 
             var results = model.Walk(walkCount);
-            
-            CollectionAssert.IsNotSubsetOf(results, ExampleData);
+
+            ExampleData.Should().NotBeSubsetOf(results);
             foreach (var result in results)
             {
-                Assert.That(result, Is.Not.Empty);
-                CollectionAssert.DoesNotContain(ExampleData, result);
+                result.Should().NotBeEmpty();
+                ExampleData.Should().NotContain(result);
             }
         }
 
-        [Test]
+        [Fact]
         public void CanWalkWithUniqueOutputUsingSeed()
         {
             var model = new StringMarkov();
@@ -88,13 +88,13 @@ namespace MarkovSharp.Tests
             var results = model.Walk(1000, "This is a line");
             foreach (var result in results)
             {
-                Assert.That(result, Is.StringStarting("This is a line"));
+                result.Should().StartWith("This is a line");
             }
 
-            Assert.AreEqual(results.Count(), results.Distinct().Count());
+            results.Distinct().Should().HaveCount(results.Count());
         }
 
-        [Test]
+        [Fact]
         public void CanWalkWithUniqueOutput()
         {
             var model = new StringMarkov();
@@ -102,10 +102,10 @@ namespace MarkovSharp.Tests
             model.EnsureUniqueWalk = true;
 
             var results = model.Walk(1000);
-            Assert.AreEqual(results.Count(), results.Distinct().Count());
+            results.Distinct().Should().HaveCount(results.Count());
         }
 
-        [Test]
+        [Fact]
         public void CanWalkUsingSeed()
         {
             var model = new StringMarkov();
@@ -113,10 +113,10 @@ namespace MarkovSharp.Tests
 
             var results = model.Walk(100, "This is a line");
 
-            Assert.AreEqual(100, results.Count());
+            results.Should().HaveCount(100);
             foreach (var result in results)
             {
-                Assert.That(result, Is.StringStarting("This is a line"));
+                result.Should().StartWith("This is a line");
             }
         }
     }

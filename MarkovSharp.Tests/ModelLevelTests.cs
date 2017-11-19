@@ -1,14 +1,13 @@
 ﻿using System;
-using MarkovSharp.Tests;
+using FluentAssertions;
 using MarkovSharp.TokenisationStrategies;
-using NUnit.Framework;
+using Xunit;
 
-namespace MarkovSharp
+namespace MarkovSharp.Tests
 {
-    [TestFixture]
     public class ModelLevelTests : BaseMarkovTests
     {
-        [Test]
+        [Fact]
         public void LevelCorrectWhenModelIsLoadedUsingDefault()
         {
             var model = new StringMarkov(3);
@@ -17,10 +16,10 @@ namespace MarkovSharp
             model.Save(ModelFileName);
 
             var loaded = model.Load<StringMarkov>(ModelFileName);
-            Assert.AreEqual(1, loaded.Level);
+            loaded.Level.Should().Be(1);
         }
 
-        [Test]
+        [Fact]
         public void LevelCorrectWhenModelIsLoadedUsingValue()
         {
             var model = new StringMarkov(3);
@@ -29,27 +28,29 @@ namespace MarkovSharp
             model.Save(ModelFileName);
 
             var loaded = model.Load<StringMarkov>(ModelFileName, 2);
-            Assert.AreEqual(2, loaded.Level);
+            loaded.Level.Should().Be(2);
         }
 
-        [TestCase(0)]
-        [TestCase(-1)]
-        [TestCase(int.MinValue)]
+        [Theory]
+        [InlineData(0)]
+        [InlineData(-1)]
+        [InlineData(int.MinValue)]
         public void LevelInvalidValueThrowsArgumentException(int level)
         {
             Assert.Throws<ArgumentException>(() => new StringMarkov(level));
         }
-
-        [TestCase(1)]
-        [TestCase(3)]
+        
+        [Theory]
+        [InlineData(1)]
+        [InlineData(3)]
         public void RetrainingSetsCorrectLevel(int retrainDepth)
         {
             var model = new StringMarkov();
             model.Learn(ExampleData);
-            Assert.AreEqual(2, model.Level);
+            model.Level.Should().Be(2);
 
             model.Retrain(retrainDepth);
-            Assert.AreEqual(retrainDepth, model.Level);
+            model.Level.Should().Be(retrainDepth);
         }
     }
 }

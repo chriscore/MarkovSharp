@@ -1,18 +1,16 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Linq;
-using log4net;
+using FluentAssertions;
 using MarkovSharp.TokenisationStrategies;
 using Newtonsoft.Json;
-using NUnit.Framework;
+using Xunit;
 
 namespace MarkovSharp.Tests
 {
-    [TestFixture]
-    public class SaveLoadTests : BaseMarkovTests
+    public class SaveLoadTests : BaseMarkovTests, IDisposable
     {
-        private readonly ILog Logger = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-
-        [Test]
+        [Fact]
         public void CanSaveEmptyModel()
         {
             var model = new StringMarkov();
@@ -20,11 +18,11 @@ namespace MarkovSharp.Tests
             
             var forLoading = new StringMarkov().Load<StringMarkov>(ModelFileName, model.Level);
 
-            Assert.AreEqual(model.Level, forLoading.Level);
-            Assert.AreEqual(model.SourceLines, forLoading.SourceLines);
+            forLoading.Level.Should().Be(model.Level);
+            forLoading.SourceLines.Should().BeEquivalentTo(model.SourceLines);
         }
 
-        [Test]
+        [Fact]
         public void CanSaveTrainedModel()
         {
             var model = new StringMarkov();
@@ -33,37 +31,37 @@ namespace MarkovSharp.Tests
 
             var forLoading = new StringMarkov().Load<StringMarkov>(ModelFileName, model.Level);
 
-            Assert.AreEqual(model.Level, forLoading.Level);
-            Assert.AreEqual(model.SourceLines, forLoading.SourceLines);
+            forLoading.Level.Should().Be(model.Level);
+            forLoading.SourceLines.Should().BeEquivalentTo(model.SourceLines);
         }
 
-        [Test]
+        [Fact]
         public void SavedFileDoesntContainModelDictionary()
         {
             var model = new StringMarkov();
             model.Learn(ExampleData);
             model.Save(ModelFileName);
 
-            string fileContents = File.ReadAllText(ModelFileName);
-            dynamic loaded = JsonConvert.DeserializeObject<dynamic>(fileContents);
-            Assert.IsNull(loaded.Model);
+            var fileContents = File.ReadAllText(ModelFileName);
+            var loaded = JsonConvert.DeserializeObject<dynamic>(fileContents);
+            ((object)loaded.Model).Should().BeNull();
         }
 
-        [Test]
+        [Fact]
         public void SavedFileContainsLevel()
         {
             var model = new StringMarkov();
             model.Learn(ExampleData);
             model.Save(ModelFileName);
 
-            string fileContents = File.ReadAllText(ModelFileName);
-            dynamic loaded = JsonConvert.DeserializeObject<dynamic>(fileContents);
-            Assert.IsNotNull(loaded.Level);
-            Assert.AreEqual(2, (int) loaded.Level);
+            var fileContents = File.ReadAllText(ModelFileName);
+            var loaded = JsonConvert.DeserializeObject<dynamic>(fileContents);
+            ((string)loaded.Level.ToString()).Should().Be("2");
         }
 
-        [TestCase(2)]
-        [TestCase(3)]
+        [Theory]
+        [InlineData(2)]
+        [InlineData(3)]
         public void CanLoadWithGivenLevel(int newLevel)
         {
             var model = new StringMarkov(1);
@@ -72,13 +70,13 @@ namespace MarkovSharp.Tests
 
             var forLoading = new StringMarkov().Load<StringMarkov>(ModelFileName, newLevel);
 
-            Assert.AreEqual(newLevel, forLoading.Level);
-            Assert.AreEqual(model.SourceLines, forLoading.SourceLines);
-            
-            Assert.AreEqual(newLevel, forLoading.Model.Max(a => a.Key.Before.Length));
+            forLoading.Level.Should().Be(newLevel);
+            forLoading.SourceLines.Should().Equal(model.SourceLines);
+
+            forLoading.Model.Max(a => a.Key.Before.Length).Should().Be(newLevel);
         }
 
-        [Test]
+        [Fact]
         public void CanWalkLoadedModel()
         {
             var model = new StringMarkov(1);
@@ -89,9 +87,14 @@ namespace MarkovSharp.Tests
             
             var lines = newModel.Walk();
 
-            Logger.Info(string.Join("\r\n", lines));
-            Assert.AreEqual(1, lines.Count());
-            Assert.That(lines.First(), Is.Not.Empty);
+            Console.WriteLine(string.Join("\r\n", lines));
+            lines.Should().HaveCount(1);
+            lines.First().Should().NotBeEmpty();
+        }
+
+        public void Dispose()
+        {
+            File.Delete(ModelFileName);
         }
     }
 }
