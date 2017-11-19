@@ -4,27 +4,38 @@ namespace MarkovSharp.TokenisationStrategies
 {
     public interface IMarkovStrategy<TPhrase, TGram>
     {
+        /// <summary>Defines how to split the phrase to ngrams</summary>
+        /// <param name="input">The phrase to split</param>
         IEnumerable<TGram> SplitTokens(TPhrase input);
-        
+
+        /// <summary>Defines how to join ngrams back together to form a phrase</summary>
         TPhrase RebuildPhrase(IEnumerable<TGram> tokens);
 
         void Learn(IEnumerable<TPhrase> phrases, bool ignoreAlreadyLearnt = true);
         
         void Learn(TPhrase phrase);
-        
+
+        /// <summary>Retrain an existing trained model instance to a different 'level'</summary>
         void Retrain(int newLevel);
-        
+
+        /// <summary>Generate a collection of phrase output data based on the current model</summary>
+        /// <param name="lines">The number of phrases to emit</param>
+        /// <param name="seed">Optionally provide the start of the phrase to generate from</param>
         IEnumerable<TPhrase> Walk(int lines = 1, TPhrase seed = default(TPhrase));
-        
+
+        /// <summary>Returns any viable options for the next word based on
+        /// what was provided as input, based on the trained model.</summary>
+        /// <param name="input">The input.</param>
         List<TGram> GetMatches(TPhrase input);
-        
+
+        /// <summary>Save the model to file for use later</summary>
+        /// <param name="file">The path to a file to store the model in</param>
         void Save(string file);
 
-        /// <summary>Loads a strategy from a file with the given filename.</summary>
-        /// <typeparam name="T">The type of <see cref="IMarkovStrategy{TPhrase,TGram}"/></typeparam>
-        /// <param name="file">The name of the file to load.</param>
-        /// <param name="level">The level.</param>
-        /// <returns></returns>
+        /// <summary>Load a model which has been saved</summary>
+        /// <typeparam name="T">The type of markov model to load the data as</typeparam>
+        /// <param name="file">The path to a file containing saved model data</param>
+        /// <param name="level">The level to apply to the loaded model (model will be trained on load)</param>
         T Load<T>(string file, int level = 1) where T : IMarkovStrategy<TPhrase, TGram>;
 
         TGram GetTerminatorGram();

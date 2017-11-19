@@ -50,14 +50,9 @@ namespace MarkovSharp
         /// Defines how to split the phrase to ngrams
         /// </summary>
         /// <param name="phrase"></param>
-        /// <returns></returns>
         public abstract IEnumerable<TGram> SplitTokens(TPhrase phrase);
 
-        /// <summary>
-        /// Defines how to join ngrams back together to form a phrase
-        /// </summary>
-        /// <param name="tokens"></param>
-        /// <returns></returns>
+        /// <summary>Defines how to join ngrams back together to form a phrase</summary>
         public abstract TPhrase RebuildPhrase(IEnumerable<TGram> tokens);
 
         public abstract TGram GetTerminatorGram();
@@ -148,7 +143,6 @@ namespace MarkovSharp
         /// <summary>
         /// Iterate over a list of TGrams and store each of them in the model at a composite key genreated from its prior [Level] number of TGrams
         /// </summary>
-        /// <param name="tokens"></param>
         private void LearnTokens(IReadOnlyList<TGram> tokens)
         {
             for (var i = 0; i < tokens.Count; i++)
@@ -189,10 +183,7 @@ namespace MarkovSharp
             }
         }
 
-        /// <summary>
-        /// Retrain an existing trained model instance to a different 'level'
-        /// </summary>
-        /// <param name="newLevel"></param>
+        /// <summary>Retrain an existing trained model instance to a different 'level'</summary>
         public void Retrain(int newLevel)
         {
             if (newLevel < 1)
@@ -231,12 +222,9 @@ namespace MarkovSharp
             }
         }
 
-        /// <summary>
-        /// Generate a collection of phrase output data based on the current model
-        /// </summary>
+        /// <summary>Generate a collection of phrase output data based on the current model</summary>
         /// <param name="lines">The number of phrases to emit</param>
         /// <param name="seed">Optionally provide the start of the phrase to generate from</param>
-        /// <returns></returns>
         public IEnumerable<TPhrase> Walk(int lines = 1, TPhrase seed = default(TPhrase))
         {
             if (seed == null)
@@ -378,13 +366,10 @@ namespace MarkovSharp
             Console.WriteLine("Model saved successfully");
         }
 
-        /// <summary>
-        /// Load a model which has been saved
-        /// </summary>
+        /// <summary>Load a model which has been saved</summary>
         /// <typeparam name="T">The type of markov model to load the data as</typeparam>
         /// <param name="file">The path to a file containing saved model data</param>
         /// <param name="level">The level to apply to the loaded model (model will be trained on load)</param>
-        /// <returns></returns>
         public T Load<T>(string file, int level = 1) where T : IMarkovStrategy<TPhrase, TGram>
         {
             Console.WriteLine($"Loading model from {file}");
