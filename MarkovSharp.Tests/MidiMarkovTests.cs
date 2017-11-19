@@ -1,8 +1,5 @@
-﻿using System;
-using System.Linq;
-using MarkovSharp.TokenisationStrategies;
+﻿using MarkovSharp.Midi;
 using NUnit.Framework;
-using Sanford.Multimedia.Midi;
 
 namespace MarkovSharp.Tests
 {

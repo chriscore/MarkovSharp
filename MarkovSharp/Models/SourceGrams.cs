@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
+﻿using System.Linq;
+using System.Web.Script.Serialization;
 
 namespace MarkovSharp.Models
 {
@@ -45,7 +41,7 @@ namespace MarkovSharp.Models
 
         public override string ToString()
         {
-            return JsonConvert.SerializeObject(Before);
+            return new JavaScriptSerializer().Serialize(Before);
         }
     }
 }

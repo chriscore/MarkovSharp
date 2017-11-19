@@ -1,14 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace MarkovSharp.TokenisationStrategies
 {
     public class StringMarkov : GenericMarkov<string, string>
     {
-        public StringMarkov(int level = 2)
+        public StringMarkov()
+            : this(2)
+        { }
+
+        public StringMarkov(int level)
             : base(level)
         { }
 

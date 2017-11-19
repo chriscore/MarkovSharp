@@ -30,3 +30,4 @@ node_modules/
 *.DotSettings
 *.playlist
 TestResults/
+/.vs/MarkovSharp/v15/Server/sqlite3
