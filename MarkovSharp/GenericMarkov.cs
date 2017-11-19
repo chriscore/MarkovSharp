@@ -21,6 +21,9 @@ namespace MarkovSharp
     /// <typeparam name="TGram"></typeparam>
     public abstract class GenericMarkov<TPhrase, TGram> : IMarkovStrategy<TPhrase, TGram>
     {
+        /// <summary>Initializes a new instance of the <see cref="GenericMarkov{TPhrase, TGram}"/> class.</summary>
+        /// <param name="level">The level.</param>
+        /// <exception cref="ArgumentException">Invalid value: level must be a positive integer - level</exception>
         protected GenericMarkov(int level = 2)
         {
             if (level < 1)
@@ -34,8 +37,10 @@ namespace MarkovSharp
             EnsureUniqueWalk = false;
         }
 
-        // Dictionary containing the model data. The key is the N number of
-        // previous words and value is a list of possible outcomes, given that key
+
+        /// <summary>// Dictionary containing the model data. The key is the N number of
+        /// previous words and value is a list of possible outcomes, given that key</summary>
+        /// <value>The model.</value>
         [JsonIgnore]
         public ConcurrentDictionary<SourceGrams<TGram>, List<TGram>> Model { get; set; }
 
@@ -65,8 +70,9 @@ namespace MarkovSharp
         /// </summary>
         public bool EnsureUniqueWalk { get; set; }
 
-        // The number of previous states for the model to to consider when 
-        //suggesting the next state
+        /// <summary>The number of previous states for the model 
+        /// to consider when suggesting the next state</summary>
+        /// <value>The level.</value>
         public int Level { get; private set; }
         
         public void Learn(IEnumerable<TPhrase> phrases, bool ignoreAlreadyLearnt = true)
@@ -310,8 +316,9 @@ namespace MarkovSharp
             return RebuildPhrase(built);
         }
 
-        // Returns any viable options for the next word based on
-        // what was provided as input, based on the trained model.
+        /// <summary>Returns any viable options for the next word based on
+        /// what was provided as input, based on the trained model.</summary>
+        /// <param name="input">The input.</param>
         public List<TGram> GetMatches(TPhrase input)
         {
             var inputArray = SplitTokens(input).ToArray();
@@ -389,12 +396,6 @@ namespace MarkovSharp
             model.Retrain(level);
 
             return model;
-            //Model = model.Model;
-            //SourceLines = model.SourceLines;
-            //Retrain(level);
-
-            //Console.WriteLine($"Loaded level {model.Level} model with {model.SourceLines.Count} lines of training data");
-            //return this;
         }
     }
 }
