@@ -2,6 +2,7 @@
 
 namespace MarkovSharp.TokenisationStrategies
 {
+    /// <summary>This model will use a phrase type of string, and also token type of string.</summary>
     public class StringMarkov : GenericMarkov<string, string>
     {
         /// <summary>Initializes a new instance of the <see cref="StringMarkov"/> class.</summary>

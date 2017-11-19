@@ -2,6 +2,11 @@
 
 namespace MarkovSharp.TokenisationStrategies
 {
+    /// <summary>
+    /// An implementation of the Markov Model Engine.
+    /// </summary>
+    /// <typeparam name="TPhrase">The type of the phrase.</typeparam>
+    /// <typeparam name="TGram">The type of the gram.</typeparam>
     public interface IMarkovStrategy<TPhrase, TGram>
     {
         /// <summary>Defines how to split the phrase to ngrams</summary>
