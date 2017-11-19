@@ -9,7 +9,5 @@ namespace MarkovSharp.Tests
     public class BaseMarkovTests
     {
         protected static readonly IEnumerable<string> ExampleData = JsonConvert.DeserializeObject<string[]>(File.ReadAllText("testlines.json")).Take(150);
-
-        protected readonly string ModelFileName = $"{Guid.NewGuid()}.json";
     }
 }

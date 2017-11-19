@@ -13,9 +13,9 @@ namespace MarkovSharp.Tests
             var model = new StringMarkov(3);
 
             model.Learn(ExampleData);
-            model.Save(ModelFileName);
+            var serialized = model.Serialize();
 
-            var loaded = model.Load<StringMarkov>(ModelFileName);
+            var loaded = model.Deserialize<StringMarkov>(serialized);
             loaded.Level.Should().Be(1);
         }
 
@@ -25,9 +25,9 @@ namespace MarkovSharp.Tests
             var model = new StringMarkov(3);
 
             model.Learn(ExampleData);
-            model.Save(ModelFileName);
+            var serialized = model.Serialize();
 
-            var loaded = model.Load<StringMarkov>(ModelFileName, 2);
+            var loaded = model.Deserialize<StringMarkov>(serialized, 2);
             loaded.Level.Should().Be(2);
         }
 

@@ -33,15 +33,14 @@ namespace MarkovSharp.TokenisationStrategies
         /// <param name="input">The input.</param>
         List<TGram> GetMatches(TPhrase input);
 
-        /// <summary>Save the model to file for use later</summary>
-        /// <param name="file">The path to a file to store the model in</param>
-        void Save(string file);
+        /// <summary>Seriaize the model to file for use later</summary>
+        string Serialize();
 
         /// <summary>Load a model which has been saved</summary>
         /// <typeparam name="T">The type of markov model to load the data as</typeparam>
-        /// <param name="file">The path to a file containing saved model data</param>
+        /// <param name="file">The serialized model data</param>
         /// <param name="level">The level to apply to the loaded model (model will be trained on load)</param>
-        T Load<T>(string file, int level = 1) where T : IMarkovStrategy<TPhrase, TGram>;
+        T Deserialize<T>(string file, int level = 1) where T : IMarkovStrategy<TPhrase, TGram>;
 
         TGram GetTerminatorGram();
 

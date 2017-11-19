@@ -17,7 +17,7 @@ namespace MarkovSharp.TokenisationStrategies
         /// <summary>Defines how to split the phrase to ngrams</summary>
         public override IEnumerable<char?> SplitTokens(string phrase) => string.IsNullOrEmpty(phrase) 
             ? new List<char?> { GetPrepadGram() } 
-            : phrase.Select(c => new char?(c));
+            : phrase.ToCharArray().Select<char, char?>(c => new char?(c));
 
         /// <summary>Defines how to join ngrams back together to form a phrase</summary>
         public override string RebuildPhrase(IEnumerable<char?> tokens)
