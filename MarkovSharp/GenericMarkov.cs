@@ -17,8 +17,6 @@ namespace MarkovSharp
     /// define overrides for SplitTokens and RebuildPhrase, which is generally
     /// all that should be needed for implementation of a new model type.
     /// </summary>
-    /// <typeparam name="TPhrase"></typeparam>
-    /// <typeparam name="TGram"></typeparam>
     public abstract class GenericMarkov<TPhrase, TGram> : IMarkovStrategy<TPhrase, TGram>
     {
         /// <summary>Initializes a new instance of the <see cref="GenericMarkov{TPhrase, TGram}"/> class.</summary>
@@ -265,7 +263,6 @@ namespace MarkovSharp
         /// Generate a single phrase of output data based on the current model
         /// </summary>
         /// <param name="seed">Optionally provide the start of the phrase to generate from</param>
-        /// <returns></returns>
         private TPhrase WalkLine(TPhrase seed)
         {
             var arraySeed = PadArrayLow(SplitTokens(seed)?.ToArray());
@@ -354,9 +351,7 @@ namespace MarkovSharp
             return p;
         }
 
-        /// <summary>
-        /// Save the model to file for use later
-        /// </summary>
+        /// <summary>Save the model to file for use later</summary>
         /// <param name="file">The path to a file to store the model in</param>
         public void Save(string file)
         {

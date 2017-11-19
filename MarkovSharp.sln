@@ -9,7 +9,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MarkovSharp.Midi", "MarkovS
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MarkovSharp", "MarkovSharp\MarkovSharp.csproj", "{2DCCA0E9-A57D-437E-B35D-64D44828CE24}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MarkovSharp.Tests", "MarkovSharp.Tests\MarkovSharp.Tests.csproj", "{A6C96658-A233-488C-A6AA-C92E74291F54}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MarkovSharp.Tests", "MarkovSharp.Tests\MarkovSharp.Tests.csproj", "{A6C96658-A233-488C-A6AA-C92E74291F54}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{2CDCBD27-EC8E-4CC8-BCFF-2CB4C926B0F0}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
