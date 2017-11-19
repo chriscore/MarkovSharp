@@ -85,7 +85,7 @@ namespace MarkovSharp.Tests
 
             var newModel = new StringMarkov().Load<StringMarkov>(ModelFileName);
             
-            var lines = newModel.Walk();
+            var lines = newModel.Walk().ToList();
 
             Console.WriteLine(string.Join("\r\n", lines));
             lines.Should().HaveCount(1);

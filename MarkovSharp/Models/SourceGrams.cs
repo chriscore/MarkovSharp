@@ -5,7 +5,7 @@ namespace MarkovSharp.Models
 {
     public class SourceGrams<T>
     {
-        public T[] Before { get; set; }
+        public T[] Before { get; }
 
         public SourceGrams(params T[] args)
         {
@@ -16,7 +16,7 @@ namespace MarkovSharp.Models
         {
             var x = o as SourceGrams<T>;
 
-            if (x == null && this != null)
+            if (x == null)
             {
                 return false;
             }
@@ -29,7 +29,7 @@ namespace MarkovSharp.Models
         {
             unchecked
             {
-                int hash = 17;
+                var hash = 17;
                 var defaultVal = default(T);
                 foreach (var member in Before.Where(a => a != null && !a.Equals(defaultVal)))
                 {

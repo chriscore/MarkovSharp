@@ -16,10 +16,10 @@ namespace MarkovSharp.TokenisationStrategies
         {
             if (input == null)
             {
-                return new List<string>() { GetPrepadGram() };
+                return new List<string> { GetPrepadGram() };
             }
 
-            return input?.Split(' ');
+            return input.Split(' ');
         }
 
         public override string RebuildPhrase(IEnumerable<string> tokens)
@@ -34,7 +34,7 @@ namespace MarkovSharp.TokenisationStrategies
 
         public override string GetPrepadGram()
         {
-            return "";
+            return string.Empty;
         }
     }
 }

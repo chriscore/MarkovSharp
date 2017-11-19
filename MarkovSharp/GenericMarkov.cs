@@ -21,7 +21,7 @@ namespace MarkovSharp
     /// <typeparam name="TGram"></typeparam>
     public abstract class GenericMarkov<TPhrase, TGram> : IMarkovStrategy<TPhrase, TGram>
     {
-        public GenericMarkov(int level = 2)
+        protected GenericMarkov(int level = 2)
         {
             if (level < 1)
             {
@@ -39,7 +39,7 @@ namespace MarkovSharp
         [JsonIgnore]
         public ConcurrentDictionary<SourceGrams<TGram>, List<TGram>> Model { get; set; }
 
-        public List<TPhrase> SourceLines { get; set; }
+        public List<TPhrase> SourceLines { get; }
 
         /// <summary>
         /// Defines how to split the phrase to ngrams
@@ -71,19 +71,20 @@ namespace MarkovSharp
         
         public void Learn(IEnumerable<TPhrase> phrases, bool ignoreAlreadyLearnt = true)
         {
+            var source = phrases.ToArray();
             if (ignoreAlreadyLearnt)
             {
-                var newTerms = phrases.Where(s => !SourceLines.Contains(s));
+                var newTerms = source.Where(s => !SourceLines.Contains(s));
 
                 Console.WriteLine($"Learning {newTerms.Count()} lines");
                 // For every sentence which hasnt already been learnt, learn it
-                Parallel.ForEach(phrases, Learn);
+                Parallel.ForEach(source, Learn);
             }
             else
             {
-                Console.WriteLine($"Learning {phrases.Count()} lines");
+                Console.WriteLine($"Learning {source.Length} lines");
                 // For every sentence, learn it
-                Parallel.ForEach(phrases, Learn);
+                Parallel.ForEach(source, Learn);
             }
         }
 
@@ -202,7 +203,7 @@ namespace MarkovSharp
             Learn(SourceLines, false);
         }
 
-        private object lockObj = new object();
+        private readonly object _lockObj = new object();
 
         /// <summary>
         /// Add a TGram to the markov models store with a composite key of the previous [Level] number of TGrams
@@ -211,7 +212,7 @@ namespace MarkovSharp
         /// <param name="value">The value to add to the store</param>
         private void AddOrCreate(SourceGrams<TGram> key, TGram value)
         {
-            lock (lockObj)
+            lock (_lockObj)
             {
                 if (!Model.ContainsKey(key))
                 {
@@ -234,7 +235,7 @@ namespace MarkovSharp
         {
             if (seed == null)
             {
-                seed = RebuildPhrase(new List<TGram>() {GetPrepadGram()});
+                seed = RebuildPhrase(new List<TGram> {GetPrepadGram()});
             }
 
             Console.WriteLine($"Walking to return {lines} phrases from {Model.Count} states");
@@ -246,8 +247,8 @@ namespace MarkovSharp
             var sentences = new List<TPhrase>();
 
             //for (var z = 0; z < lines; z++)k
-            int genCount = 0;
-            int created = 0;
+            var genCount = 0;
+            var created = 0;
             while (created < lines)
             {
                 if (genCount == lines*10)
@@ -274,7 +275,7 @@ namespace MarkovSharp
         private TPhrase WalkLine(TPhrase seed)
         {
             var arraySeed = PadArrayLow(SplitTokens(seed)?.ToArray());
-            List<TGram> built = new List<TGram>();
+            var built = new List<TGram>();
 
             // Allocate a queue to act as the memory, which is n 
             // levels deep of previous words that were used
@@ -314,11 +315,11 @@ namespace MarkovSharp
         public List<TGram> GetMatches(TPhrase input)
         {
             var inputArray = SplitTokens(input).ToArray();
-            if (inputArray.Count() > Level)
+            if (inputArray.Length > Level)
             {
                 inputArray = inputArray.Skip(inputArray.Length - Level).ToArray();
             }
-            else if (inputArray.Count() < Level)
+            else if (inputArray.Length < Level)
             {
                 inputArray = PadArrayLow(inputArray);
             }
@@ -344,13 +345,13 @@ namespace MarkovSharp
             }
 
             var p = new TGram[Level];
-            int j = 0;
-            for (int i = (Level - input.Length); i < (Level); i++)
+            var j = 0;
+            for (var i = Level - input.Length; i < Level; i++)
             {
                 p[i] = input[j];
                 j++;
             }
-            for (int i = Level - input.Length; i > 0; i--)
+            for (var i = Level - input.Length; i > 0; i--)
             {
                 p[i - 1] = GetPrepadGram();
             }
@@ -364,10 +365,10 @@ namespace MarkovSharp
         /// <param name="file">The path to a file to store the model in</param>
         public void Save(string file)
         {
-            Console.WriteLine($"Saving model with {this.Model.Count} model values");
+            Console.WriteLine($"Saving model with {Model.Count} model values");
             var modelJson = JsonConvert.SerializeObject(this);
             File.WriteAllText(file, modelJson);
-            Console.WriteLine($"Model saved successfully");
+            Console.WriteLine("Model saved successfully");
         }
 
         /// <summary>
@@ -382,8 +383,8 @@ namespace MarkovSharp
             Console.WriteLine($"Loading model from {file}");
             var model = JsonConvert.DeserializeObject<T>(File.ReadAllText(file));
 
-            Console.WriteLine($"Model data loaded successfully");
-            Console.WriteLine($"Assigning new model parameters");
+            Console.WriteLine("Model data loaded successfully");
+            Console.WriteLine("Assigning new model parameters");
 
             model.Retrain(level);
 

@@ -14,7 +14,7 @@ namespace MarkovSharp.Tests
         {
             var model = new StringMarkov();
             model.Learn(ExampleData);
-            var result = model.Walk(1);
+            var result = model.Walk().ToList();
 
             result.Should().HaveCount(1);
             Console.WriteLine(result.First());
@@ -52,7 +52,8 @@ namespace MarkovSharp.Tests
             var model = new StringMarkov();
             var ex = Assert.Throws<ArgumentException>(() =>
             {
-                var x = model.Walk(lineCount).ToList();
+                // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
+                model.Walk(lineCount).ToList();
             });
             ex.Message.Should().Be("Invalid argument - line count for walk must be a positive integer\r\nParameter name: lines");
         }
@@ -68,7 +69,7 @@ namespace MarkovSharp.Tests
             model.Learn(ExampleData);
             model.EnsureUniqueWalk = true;
 
-            var results = model.Walk(walkCount);
+            var results = model.Walk(walkCount).ToList();
 
             ExampleData.Should().NotBeSubsetOf(results);
             foreach (var result in results)
@@ -85,13 +86,13 @@ namespace MarkovSharp.Tests
             model.Learn(ExampleData);
             model.EnsureUniqueWalk = true;
 
-            var results = model.Walk(1000, "This is a line");
+            var results = model.Walk(1000, "This is a line").ToList();
             foreach (var result in results)
             {
                 result.Should().StartWith("This is a line");
             }
 
-            results.Distinct().Should().HaveCount(results.Count());
+            results.Distinct().Should().HaveCount(results.Count);
         }
 
         [Fact]
@@ -101,8 +102,8 @@ namespace MarkovSharp.Tests
             model.Learn(ExampleData);
             model.EnsureUniqueWalk = true;
 
-            var results = model.Walk(1000);
-            results.Distinct().Should().HaveCount(results.Count());
+            var results = model.Walk(1000).ToList();
+            results.Distinct().Should().HaveCount(results.Count);
         }
 
         [Fact]
@@ -111,7 +112,7 @@ namespace MarkovSharp.Tests
             var model = new StringMarkov();
             model.Learn(ExampleData);
 
-            var results = model.Walk(100, "This is a line");
+            var results = model.Walk(100, "This is a line").ToList();
 
             results.Should().HaveCount(100);
             foreach (var result in results)

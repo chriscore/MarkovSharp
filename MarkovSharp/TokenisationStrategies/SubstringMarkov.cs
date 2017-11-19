@@ -6,11 +6,11 @@ namespace MarkovSharp.TokenisationStrategies
     public class SubstringMarkov : GenericMarkov<string, char?>
     {
         public SubstringMarkov()
-            :this(2)
+            : this(2)
         { }
 
         public SubstringMarkov(int level)
-            :base(level)
+            : base(level)
         { }
 
         public override IEnumerable<char?> SplitTokens(string phrase)
@@ -19,7 +19,7 @@ namespace MarkovSharp.TokenisationStrategies
             {
                 return new List<char?> { GetPrepadGram() };
             }
-            
+
             return phrase.Select(c => new char?(c));
         }
 
@@ -28,8 +28,11 @@ namespace MarkovSharp.TokenisationStrategies
             var transformed = tokens
                 .Where(t => t != null)
                 .Select(t => t.Value).ToArray();
-            
-            return new string(transformed).Replace(new string(new char[] { GetPrepadGram().Value }), "");
+
+            var prepadGram = GetPrepadGram();
+            return prepadGram != null 
+                ? new string(transformed).Replace(new string(new[] { prepadGram.Value }), "") 
+                : null;
         }
 
         public override char? GetTerminatorGram()

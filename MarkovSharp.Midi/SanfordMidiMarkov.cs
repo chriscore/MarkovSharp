@@ -9,13 +9,13 @@ namespace MarkovSharp.Midi
         public SanfordMidiMarkov()
             : this(2)
         {
-            this.Channel = 1;
+            Channel = 1;
         }
 
         public SanfordMidiMarkov(int level = 2)
             : base(level)
         {
-            this.Channel = 1;
+            Channel = 1;
         }
 
         public int Channel { get; set; }
@@ -42,7 +42,7 @@ namespace MarkovSharp.Midi
             // notes will be placed exactly in the arrangement where they were before,
             // just with some missing.
             var t = new Track();
-            int pos = 0;
+            var pos = 0;
             
             foreach (var token in tokens)
             {
@@ -65,9 +65,9 @@ namespace MarkovSharp.Midi
                 return new List<Note>();
             }
 
-            List<NoteEvent> notes = new List<NoteEvent>();
+            var notes = new List<NoteEvent>();
             
-            for (int i = 0; i < track.Count; i++)
+            for (var i = 0; i < track.Count; i++)
             {
                 var midiEvent = track.GetMidiEvent(i);
                 if (midiEvent.MidiMessage.MessageType == MessageType.Channel)
@@ -87,13 +87,13 @@ namespace MarkovSharp.Midi
 
         private List<Note> PairUpNoteEvents(List<NoteEvent> notes)
         {
-            List<Note> builtList = new List<Note>();
+            var builtList = new List<Note>();
 
             var noteArray = notes.ToArray();
 
-            int lastTimestamp = 0;
+            var lastTimestamp = 0;
 
-            for (int i = 0; i < noteArray.Length; i++)
+            for (var i = 0; i < noteArray.Length; i++)
             {
                 var current = noteArray[i];
                 //current.Dump($"current ({i})");
@@ -106,9 +106,9 @@ namespace MarkovSharp.Midi
                 if (current.Command == ChannelCommand.NoteOn)
                 {
                     // collect and remove the corresponding note off message
-                    for (int j = 0; j < noteArray.Length; j++)
+                    for (var j = 0; j < noteArray.Length; j++)
                     {
-                        if (noteArray[j]?.Pitch == current?.Pitch && noteArray[j]?.Velocity == 0)
+                        if (noteArray[j]?.Pitch == current.Pitch && noteArray[j]?.Velocity == 0)
                         {
                             var paired = noteArray[j];
                             //paired.Dump($"paired ({j})");
@@ -167,19 +167,17 @@ namespace MarkovSharp.Midi
         public override bool Equals(object o)
         {
             var x = o as NoteEvent;
-            if (x == null && this != null)
+            if (x == null)
             {
                 return false;
             }
 
             var equals =
-            (
-                this.Pitch == x.Pitch
-                &&
-                ((Velocity != 0 && x.Velocity != 0) || (Velocity == 0 && x.Velocity == 0))
-                &&
-                Command == x.Command
-            );
+            Pitch == x.Pitch
+            &&
+            (Velocity != 0 && x.Velocity != 0 || Velocity == 0 && x.Velocity == 0)
+            &&
+            Command == x.Command;
 
             return equals;
         }
@@ -188,7 +186,7 @@ namespace MarkovSharp.Midi
         {
             unchecked
             {
-                int hash = 17;
+                var hash = 17;
                 hash = hash * 23 + Pitch.GetHashCode();
                 hash = hash * 7 + (Velocity == 0).GetHashCode();
                 //hash = hash * 23 + Duration.GetHashCode();
@@ -200,28 +198,29 @@ namespace MarkovSharp.Midi
     public class Note : IComparable
     {
         public int Pitch { get; set; }
+
         public int Velocity { get; set; }
+
         public int Duration { get; set; }
+
         public int StartTime { get; set; }
+
         public int TimeSinceLastEvent { get; set; }
+
         public ChannelCommand Command { get; set; }
 
         public override bool Equals(object o)
         {
             var x = o as Note;
-            if (x == null && this != null)
+            if (x == null)
             {
                 return false;
             }
 
             var equals =
-            (
-                this.Pitch == x.Pitch
-                &&
-                ((Velocity != 0 && x.Velocity != 0) || (Velocity == 0 && x.Velocity == 0))
-            //&&
-            //Duration == x.Duration
-            );
+            Pitch == x.Pitch
+            &&
+            (Velocity != 0 && x.Velocity != 0 || Velocity == 0 && x.Velocity == 0);
 
             return equals;
         }
@@ -230,7 +229,7 @@ namespace MarkovSharp.Midi
         {
             unchecked
             {
-                int hash = 17;
+                var hash = 17;
                 hash = hash * 23 + Pitch.GetHashCode();
                 hash = hash * 13 + (Velocity == 0).GetHashCode();
                 //hash = hash * 23 + Duration.GetHashCode();
@@ -241,12 +240,7 @@ namespace MarkovSharp.Midi
         public int CompareTo(object obj)
         {
             var x = obj as Note;
-            if (x == null && this != null)
-            {
-                return 0;
-            }
-
-            return this.Pitch.CompareTo(x.Pitch);
+            return x == null ? 0 : Pitch.CompareTo(x.Pitch);
         }
     }
 }
