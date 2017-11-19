@@ -68,6 +68,10 @@
     <Compile Include="WalkTests.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\MarkovSharp.Midi\MarkovSharp.Midi.csproj">
+      <Project>{85c338f8-6f33-48e1-b1aa-300d8745ce98}</Project>
+      <Name>MarkovSharp.Midi</Name>
+    </ProjectReference>
     <ProjectReference Include="..\MarkovSharp\MarkovSharp.csproj">
       <Project>{D3003B4E-0007-43EB-B350-2410286C6DB5}</Project>
       <Name>MarkovSharp</Name>

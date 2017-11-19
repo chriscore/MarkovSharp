@@ -1,14 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MarkovSharp.TokenisationStrategies
 {
     public class SubstringMarkov : GenericMarkov<string, char?>
     {
-        public SubstringMarkov(int level = 2)
+        public SubstringMarkov()
+            :this(2)
+        { }
+
+        public SubstringMarkov(int level)
             :base(level)
         { }
 
