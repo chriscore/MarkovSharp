@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>Chris Core</authors>
+    <owners>Chris Core</owners>
+    <licenseUrl>https://github.com/chriscore/MarkovSharp/blob/master/README.md</licenseUrl>
+    <projectUrl>https://github.com/chriscore/MarkovSharp</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>MIDI functionality for MarkovSharp.</description>
+    <tags>markov model machine learning text generation midi</tags>
+  </metadata>
+</package>

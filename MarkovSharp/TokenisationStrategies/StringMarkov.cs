@@ -1,40 +1,31 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace MarkovSharp.TokenisationStrategies
 {
+    /// <summary>This model will use a phrase type of string, and also token type of string.</summary>
     public class StringMarkov : GenericMarkov<string, string>
     {
-        public StringMarkov(int level = 2)
-            : base(level)
-        { }
+        /// <summary>Initializes a new instance of the <see cref="StringMarkov"/> class.</summary>
+        public StringMarkov()
+            : this(2) { }
 
-        public override IEnumerable<string> SplitTokens(string input)
-        {
-            if (input == null)
-            {
-                return new List<string>() { GetPrepadGram() };
-            }
+        /// <summary>Initializes a new instance of the <see cref="StringMarkov"/> class.</summary>
+        /// <param name="level">The level.</param>
+        public StringMarkov(int level)
+            : base(level) { }
 
-            return input?.Split(' ');
-        }
+        /// <summary>Defines how to split the phrase to ngrams</summary>
+        /// <param name="input">The phrase to split</param>
+        public override IEnumerable<string> SplitTokens(string input) => input == null 
+            ? (IEnumerable<string>) new List<string> {GetPrepadGram()} 
+            : input.Split(' ');
 
-        public override string RebuildPhrase(IEnumerable<string> tokens)
-        {
-            return string.Join(" ", tokens);
-        }
+        /// <summary>Defines how to join ngrams back together to form a phrase</summary>
+        /// <param name="tokens"></param>
+        public override string RebuildPhrase(IEnumerable<string> tokens) => string.Join(" ", tokens);
 
-        public override string GetTerminatorGram()
-        {
-            return null;
-        }
+        public override string GetTerminatorGram() => null;
 
-        public override string GetPrepadGram()
-        {
-            return "";
-        }
+        public override string GetPrepadGram() => string.Empty;
     }
 }

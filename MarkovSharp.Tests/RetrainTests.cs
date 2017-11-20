@@ -2,28 +2,30 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using FluentAssertions;
 using MarkovSharp.Models;
 using MarkovSharp.TokenisationStrategies;
-using NUnit.Framework;
+using Xunit;
 
 namespace MarkovSharp.Tests
 {
-    [TestFixture]
     public class RetrainTests : BaseMarkovTests
     {
-        [TestCase(1)]
-        [TestCase(3)]
+        [Theory]
+        [InlineData(1)]
+        [InlineData(3)]
         public void RetrainingSetsCorrectDictionaryKeyLength(int retrainDepth)
         {
             var model = new StringMarkov();
             model.Learn(ExampleData);
 
             model.Retrain(retrainDepth);
-            Assert.AreEqual(retrainDepth, model.Model.Max(a => a.Key.Before.Length));
+            model.Model.Max(a => a.Key.Before.Length).Should().Be(retrainDepth);
         }
 
-        [TestCase(1)]
-        [TestCase(3)]
+        [Theory]
+        [InlineData(1)]
+        [InlineData(3)]
         public void SourceLinesAreSameAfterRetrained(int retrainDepth)
         {
             var model = new StringMarkov();
@@ -31,12 +33,13 @@ namespace MarkovSharp.Tests
             var oldLines = new List<string>(model.SourceLines);
 
             model.Retrain(retrainDepth);
-            CollectionAssert.AreEquivalent(oldLines, model.SourceLines);
+            model.SourceLines.ShouldBeEquivalentTo(oldLines);
         }
 
-        [TestCase(1, false)]
-        [TestCase(2, true)]
-        [TestCase(3, false)]
+        [Theory]
+        [InlineData(1, false)]
+        [InlineData(2, true)]
+        [InlineData(3, false)]
         public void RetrainedModelIsNotSameIfLevelIsDifferent(int retrainDepth, bool expectSameModel)
         {
             var model = new StringMarkov();
@@ -48,25 +51,26 @@ namespace MarkovSharp.Tests
             if (expectSameModel)
             {
                 //CollectionAssert.AreEquivalent(dict, model.Model);
-                Assert.AreEqual(dict.Sum(a => a.Key.Before.Count()), model.Model.Sum(a => a.Key.Before.Count()));
+                model.Model.Sum(a => a.Key.Before.Length).Should().Be(dict.Sum(a => a.Key.Before.Length));
             }
             else
             {
                 //CollectionAssert.AreNotEquivalent(dict, model.Model);
-                Assert.AreNotEqual(dict.Sum(a => a.Key.Before.Count()), model.Model.Sum(a => a.Key.Before.Count()));
+                model.Model.Sum(a => a.Key.Before.Length).Should().NotBe(dict.Sum(a => a.Key.Before.Length));
             }
         }
 
-        [TestCase(0)]
-        [TestCase(-1)]
-        [TestCase(int.MinValue)]
+        [Theory]
+        [InlineData(0)]
+        [InlineData(-1)]
+        [InlineData(int.MinValue)]
         public void RetrainValueMustBePositiveInteger(int retrainDepth)
         {
             var model = new StringMarkov();
             model.Learn(ExampleData);
 
             var ex = Assert.Throws<ArgumentException>(() => model.Retrain(retrainDepth));
-            Assert.AreEqual("Invalid argument - retrain level must be a positive integer\r\nParameter name: newLevel", ex.Message);
+            ex.Message.Should().Be("Invalid argument - retrain level must be a positive integer\r\nParameter name: newLevel");
         }
     }
 }

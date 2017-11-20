@@ -1,23 +1,23 @@
-﻿using MarkovSharp.TokenisationStrategies;
-using NUnit.Framework;
+﻿using FluentAssertions;
+using MarkovSharp.TokenisationStrategies;
+using Xunit;
 
 namespace MarkovSharp.Tests
 {
-    [TestFixture]
     public class MarkovTests : BaseMarkovTests
     {
-        [Test]
+        [Fact]
         public void ParameterlessConstructorUsesLevel2()
         {
             var model = new StringMarkov();
-            Assert.AreEqual(2, model.Level);
+            model.Level.Should().Be(2);
         }
 
-        [Test]
+        [Fact]
         public void LevelCanBeSetUsingConstructor()
         {
             var model = new StringMarkov(4);
-            Assert.AreEqual(4, model.Level);
+            model.Level.Should().Be(4);
         }
     }
 }
