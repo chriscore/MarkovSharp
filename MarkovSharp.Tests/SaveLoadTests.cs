@@ -1,97 +1,92 @@
-﻿using System.IO;
+﻿using System;
 using System.Linq;
-using log4net;
+using FluentAssertions;
 using MarkovSharp.TokenisationStrategies;
 using Newtonsoft.Json;
-using NUnit.Framework;
+using Xunit;
 
 namespace MarkovSharp.Tests
 {
-    [TestFixture]
-    public class SaveLoadTests : BaseMarkovTests
+    public class SerializeTests : BaseMarkovTests
     {
-        private readonly ILog Logger = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-
-        [Test]
-        public void CanSaveEmptyModel()
+        [Fact]
+        public void CanSerializeEmptyModel()
         {
             var model = new StringMarkov();
-            model.Save(ModelFileName);
+            var serialized = model.Serialize();
             
-            var forLoading = new StringMarkov().Load<StringMarkov>(ModelFileName, model.Level);
+            var forLoading = new StringMarkov().Deserialize<StringMarkov>(serialized, model.Level);
 
-            Assert.AreEqual(model.Level, forLoading.Level);
-            Assert.AreEqual(model.SourceLines, forLoading.SourceLines);
+            forLoading.Level.Should().Be(model.Level);
+            forLoading.SourceLines.Should().BeEquivalentTo(model.SourceLines);
         }
 
-        [Test]
-        public void CanSaveTrainedModel()
+        [Fact]
+        public void CanSerializeTrainedModel()
         {
             var model = new StringMarkov();
             model.Learn(ExampleData);
-            model.Save(ModelFileName);
+            var serialized = model.Serialize();
 
-            var forLoading = new StringMarkov().Load<StringMarkov>(ModelFileName, model.Level);
+            var forLoading = new StringMarkov().Deserialize<StringMarkov>(serialized, model.Level);
 
-            Assert.AreEqual(model.Level, forLoading.Level);
-            Assert.AreEqual(model.SourceLines, forLoading.SourceLines);
+            forLoading.Level.Should().Be(model.Level);
+            forLoading.SourceLines.Should().BeEquivalentTo(model.SourceLines);
         }
 
-        [Test]
-        public void SavedFileDoesntContainModelDictionary()
+        [Fact]
+        public void SerializedModelDoesntContainModelDictionary()
         {
             var model = new StringMarkov();
             model.Learn(ExampleData);
-            model.Save(ModelFileName);
+            var serialized = model.Serialize();
 
-            string fileContents = File.ReadAllText(ModelFileName);
-            dynamic loaded = JsonConvert.DeserializeObject<dynamic>(fileContents);
-            Assert.IsNull(loaded.Model);
+            var loaded = JsonConvert.DeserializeObject<dynamic>(serialized);
+            ((object)loaded.Model).Should().BeNull();
         }
 
-        [Test]
-        public void SavedFileContainsLevel()
+        [Fact]
+        public void SerializedModelContainsLevel()
         {
             var model = new StringMarkov();
             model.Learn(ExampleData);
-            model.Save(ModelFileName);
+            var serialized = model.Serialize();
 
-            string fileContents = File.ReadAllText(ModelFileName);
-            dynamic loaded = JsonConvert.DeserializeObject<dynamic>(fileContents);
-            Assert.IsNotNull(loaded.Level);
-            Assert.AreEqual(2, (int) loaded.Level);
+            var loaded = JsonConvert.DeserializeObject<dynamic>(serialized);
+            ((string)loaded.Level.ToString()).Should().Be("2");
         }
 
-        [TestCase(2)]
-        [TestCase(3)]
-        public void CanLoadWithGivenLevel(int newLevel)
+        [Theory]
+        [InlineData(2)]
+        [InlineData(3)]
+        public void CanDeserializeWithGivenLevel(int newLevel)
         {
             var model = new StringMarkov(1);
             model.Learn(ExampleData);
-            model.Save(ModelFileName);
+            var serialized = model.Serialize();
 
-            var forLoading = new StringMarkov().Load<StringMarkov>(ModelFileName, newLevel);
+            var forLoading = new StringMarkov().Deserialize<StringMarkov>(serialized, newLevel);
 
-            Assert.AreEqual(newLevel, forLoading.Level);
-            Assert.AreEqual(model.SourceLines, forLoading.SourceLines);
-            
-            Assert.AreEqual(newLevel, forLoading.Model.Max(a => a.Key.Before.Length));
+            forLoading.Level.Should().Be(newLevel);
+            forLoading.SourceLines.Should().Equal(model.SourceLines);
+
+            forLoading.Model.Max(a => a.Key.Before.Length).Should().Be(newLevel);
         }
 
-        [Test]
+        [Fact]
         public void CanWalkLoadedModel()
         {
             var model = new StringMarkov(1);
             model.Learn(ExampleData);
-            model.Save(ModelFileName);
+            var serialized = model.Serialize();
 
-            var newModel = new StringMarkov().Load<StringMarkov>(ModelFileName);
+            var newModel = new StringMarkov().Deserialize<StringMarkov>(serialized);
             
-            var lines = newModel.Walk();
+            var lines = newModel.Walk().ToList();
 
-            Logger.Info(string.Join("\r\n", lines));
-            Assert.AreEqual(1, lines.Count());
-            Assert.That(lines.First(), Is.Not.Empty);
+            Console.WriteLine(string.Join("\r\n", lines));
+            lines.Should().HaveCount(1);
+            lines.First().Should().NotBeEmpty();
         }
     }
 }

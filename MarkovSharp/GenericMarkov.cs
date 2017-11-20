@@ -1,17 +1,10 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.IO;
+using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using log4net;
 using MarkovSharp.TokenisationStrategies;
-using Newtonsoft.Json;
 using MarkovSharp.Models;
-
-[assembly: log4net.Config.XmlConfigurator(ConfigFile = "log4net.config", Watch = true)]
+using Newtonsoft.Json;
 
 namespace MarkovSharp
 {
@@ -22,44 +15,40 @@ namespace MarkovSharp
     /// define overrides for SplitTokens and RebuildPhrase, which is generally
     /// all that should be needed for implementation of a new model type.
     /// </summary>
-    /// <typeparam name="TPhrase"></typeparam>
-    /// <typeparam name="TGram"></typeparam>
     public abstract class GenericMarkov<TPhrase, TGram> : IMarkovStrategy<TPhrase, TGram>
     {
-        private readonly ILog Logger = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-
-        public GenericMarkov(int level = 2)
+        /// <summary>Initializes a new instance of the <see cref="GenericMarkov{TPhrase, TGram}"/> class.</summary>
+        /// <param name="level">The level.</param>
+        /// <exception cref="ArgumentException">Invalid value: level must be a positive integer - level</exception>
+        protected GenericMarkov(int level = 2)
         {
             if (level < 1)
             {
                 throw new ArgumentException("Invalid value: level must be a positive integer", nameof(level));
             }
 
-            Model = new ConcurrentDictionary<SourceGrams<TGram>, List<TGram>>();
+            Model = new Dictionary<SourceGrams<TGram>, List<TGram>>();
             SourceLines = new List<TPhrase>();
             Level = level;
             EnsureUniqueWalk = false;
         }
 
-        // Dictionary containing the model data. The key is the N number of
-        // previous words and value is a list of possible outcomes, given that key
-        [JsonIgnore]
-        public ConcurrentDictionary<SourceGrams<TGram>, List<TGram>> Model { get; set; }
 
-        public List<TPhrase> SourceLines { get; set; }
+        /// <summary>// Dictionary containing the model data. The key is the N number of
+        /// previous words and value is a list of possible outcomes, given that key</summary>
+        /// <value>The model.</value>
+        [JsonIgnore]
+        public Dictionary<SourceGrams<TGram>, List<TGram>> Model { get; set; }
+
+        public List<TPhrase> SourceLines { get; }
 
         /// <summary>
         /// Defines how to split the phrase to ngrams
         /// </summary>
         /// <param name="phrase"></param>
-        /// <returns></returns>
         public abstract IEnumerable<TGram> SplitTokens(TPhrase phrase);
 
-        /// <summary>
-        /// Defines how to join ngrams back together to form a phrase
-        /// </summary>
-        /// <param name="tokens"></param>
-        /// <returns></returns>
+        /// <summary>Defines how to join ngrams back together to form a phrase</summary>
         public abstract TPhrase RebuildPhrase(IEnumerable<TGram> tokens);
 
         public abstract TGram GetTerminatorGram();
@@ -72,31 +61,33 @@ namespace MarkovSharp
         /// </summary>
         public bool EnsureUniqueWalk { get; set; }
 
-        // The number of previous states for the model to to consider when 
-        //suggesting the next state
+        /// <summary>The number of previous states for the model 
+        /// to consider when suggesting the next state</summary>
+        /// <value>The level.</value>
         public int Level { get; private set; }
         
         public void Learn(IEnumerable<TPhrase> phrases, bool ignoreAlreadyLearnt = true)
         {
+            var source = phrases.ToList();
             if (ignoreAlreadyLearnt)
             {
-                var newTerms = phrases.Where(s => !SourceLines.Contains(s));
+                var newTerms = source.Where(s => !SourceLines.Contains(s)).ToList();
 
-                Logger.Info($"Learning {newTerms.Count()} lines");
+                Debug.WriteLine($"Learning {newTerms.Count} lines");
                 // For every sentence which hasnt already been learnt, learn it
-                Parallel.ForEach(phrases, Learn);
+                foreach (var phrase in newTerms) Learn(phrase);
             }
             else
             {
-                Logger.Info($"Learning {phrases.Count()} lines");
+                Debug.WriteLine($"Learning {source.Count} lines");
                 // For every sentence, learn it
-                Parallel.ForEach(phrases, Learn);
+                foreach (var phrase in source) Learn(phrase);
             }
         }
 
         public void Learn(TPhrase phrase)
         {
-            Logger.Info($"Learning phrase: '{phrase}'");
+            Debug.WriteLine($"Learning phrase: '{phrase}'");
             if (phrase == null || phrase.Equals(default(TPhrase)))
             {
                 return;
@@ -105,7 +96,7 @@ namespace MarkovSharp
             // Ignore particularly short sentences
             if (SplitTokens(phrase).Count() < Level)
             {
-                Logger.Info($"Phrase {phrase} too short - skipped");
+                Debug.WriteLine($"Phrase {phrase} too short - skipped");
                 return;
             }
 
@@ -113,7 +104,7 @@ namespace MarkovSharp
             // when learning in future
             if (!SourceLines.Contains(phrase))
             {
-                Logger.Debug($"Adding phrase {phrase} to source lines");
+                Debug.WriteLine($"Adding phrase {phrase} to source lines");
                 SourceLines.Add(phrase);
             }
             
@@ -129,18 +120,18 @@ namespace MarkovSharp
                 try
                 {
                     previous = tokens[tokens.Length - j];
-                    Logger.Debug($"Adding TGram ({typeof(TGram)}) {previous} to lastCol");
+                    Debug.WriteLine($"Adding TGram ({typeof(TGram)}) {previous} to lastCol");
                     lastCol.Add(previous);
                 }
                 catch (IndexOutOfRangeException e)
                 {
-                    Logger.Warn($"Caught an exception: {e}");
+                    Debug.WriteLine($"Caught an exception: {e}");
                     previous = GetPrepadGram();
                     lastCol.Add(previous);
                 }
             }
 
-            Logger.Debug($"Reached final key for phrase {phrase}");
+            Debug.WriteLine($"Reached final key for phrase {phrase}");
             var finalKey = new SourceGrams<TGram>(lastCol.ToArray());
             AddOrCreate(finalKey, GetTerminatorGram());
         }
@@ -148,7 +139,6 @@ namespace MarkovSharp
         /// <summary>
         /// Iterate over a list of TGrams and store each of them in the model at a composite key genreated from its prior [Level] number of TGrams
         /// </summary>
-        /// <param name="tokens"></param>
         private void LearnTokens(IReadOnlyList<TGram> tokens)
         {
             for (var i = 0; i < tokens.Count; i++)
@@ -189,10 +179,7 @@ namespace MarkovSharp
             }
         }
 
-        /// <summary>
-        /// Retrain an existing trained model instance to a different 'level'
-        /// </summary>
-        /// <param name="newLevel"></param>
+        /// <summary>Retrain an existing trained model instance to a different 'level'</summary>
         public void Retrain(int newLevel)
         {
             if (newLevel < 1)
@@ -200,16 +187,16 @@ namespace MarkovSharp
                 throw new ArgumentException("Invalid argument - retrain level must be a positive integer", nameof(newLevel));
             }
 
-            Logger.Info($"Retraining model as level {newLevel}");
+            Debug.WriteLine($"Retraining model as level {newLevel}");
             Level = newLevel;
 
             // Empty the model so it can be rebuilt
-            Model = new ConcurrentDictionary<SourceGrams<TGram>, List<TGram>>();
+            Model = new Dictionary<SourceGrams<TGram>, List<TGram>>();
 
             Learn(SourceLines, false);
         }
 
-        private object lockObj = new object();
+        private readonly object _lockObj = new object();
 
         /// <summary>
         /// Add a TGram to the markov models store with a composite key of the previous [Level] number of TGrams
@@ -218,11 +205,11 @@ namespace MarkovSharp
         /// <param name="value">The value to add to the store</param>
         private void AddOrCreate(SourceGrams<TGram> key, TGram value)
         {
-            lock (lockObj)
+            lock (_lockObj)
             {
                 if (!Model.ContainsKey(key))
                 {
-                    Model.TryAdd(key, new List<TGram> {value});
+                    Model.Add(key, new List<TGram> {value});
                 }
                 else
                 {
@@ -231,20 +218,17 @@ namespace MarkovSharp
             }
         }
 
-        /// <summary>
-        /// Generate a collection of phrase output data based on the current model
-        /// </summary>
+        /// <summary>Generate a collection of phrase output data based on the current model</summary>
         /// <param name="lines">The number of phrases to emit</param>
         /// <param name="seed">Optionally provide the start of the phrase to generate from</param>
-        /// <returns></returns>
         public IEnumerable<TPhrase> Walk(int lines = 1, TPhrase seed = default(TPhrase))
         {
             if (seed == null)
             {
-                seed = RebuildPhrase(new List<TGram>() {GetPrepadGram()});
+                seed = RebuildPhrase(new List<TGram> {GetPrepadGram()});
             }
 
-            Logger.Info($"Walking to return {lines} phrases from {Model.Count} states");
+            Debug.WriteLine($"Walking to return {lines} phrases from {Model.Count} states");
             if (lines < 1)
             {
                 throw new ArgumentException("Invalid argument - line count for walk must be a positive integer", nameof(lines));
@@ -253,13 +237,13 @@ namespace MarkovSharp
             var sentences = new List<TPhrase>();
 
             //for (var z = 0; z < lines; z++)k
-            int genCount = 0;
-            int created = 0;
+            var genCount = 0;
+            var created = 0;
             while (created < lines)
             {
                 if (genCount == lines*10)
                 {
-                    Logger.Info($"Breaking out of walk early - {genCount} generations did not produce {lines} distinct lines ({sentences.Count} were created)");
+                    Debug.WriteLine($"Breaking out of walk early - {genCount} generations did not produce {lines} distinct lines ({sentences.Count} were created)");
                     break;
                 }
                 var result = WalkLine(seed);
@@ -277,15 +261,14 @@ namespace MarkovSharp
         /// Generate a single phrase of output data based on the current model
         /// </summary>
         /// <param name="seed">Optionally provide the start of the phrase to generate from</param>
-        /// <returns></returns>
         private TPhrase WalkLine(TPhrase seed)
         {
             var arraySeed = PadArrayLow(SplitTokens(seed)?.ToArray());
-            List<TGram> built = new List<TGram>();
+            var built = new List<TGram>();
 
             // Allocate a queue to act as the memory, which is n 
             // levels deep of previous words that were used
-            var q = new Queue(arraySeed);
+            var q = new Queue<TGram>(arraySeed);
 
             // If the start of the generated text has been seeded,
             // append that before generating the rest
@@ -297,7 +280,7 @@ namespace MarkovSharp
             while (built.Count < 1500)
             {
                 // Choose a new word to add from the model
-                //Logger.Info($"In Walkline loop: builtcount = {built.Count}");
+                //Debug.WriteLine($"In Walkline loop: builtcount = {built.Count}");
                 var key = new SourceGrams<TGram>(q.Cast<TGram>().ToArray());
                 if (Model.ContainsKey(key))
                 {
@@ -316,16 +299,17 @@ namespace MarkovSharp
             return RebuildPhrase(built);
         }
 
-        // Returns any viable options for the next word based on
-        // what was provided as input, based on the trained model.
+        /// <summary>Returns any viable options for the next word based on
+        /// what was provided as input, based on the trained model.</summary>
+        /// <param name="input">The input.</param>
         public List<TGram> GetMatches(TPhrase input)
         {
             var inputArray = SplitTokens(input).ToArray();
-            if (inputArray.Count() > Level)
+            if (inputArray.Length > Level)
             {
                 inputArray = inputArray.Skip(inputArray.Length - Level).ToArray();
             }
-            else if (inputArray.Count() < Level)
+            else if (inputArray.Length < Level)
             {
                 inputArray = PadArrayLow(inputArray);
             }
@@ -351,13 +335,13 @@ namespace MarkovSharp
             }
 
             var p = new TGram[Level];
-            int j = 0;
-            for (int i = (Level - input.Length); i < (Level); i++)
+            var j = 0;
+            for (var i = Level - input.Length; i < Level; i++)
             {
                 p[i] = input[j];
                 j++;
             }
-            for (int i = Level - input.Length; i > 0; i--)
+            for (var i = Level - input.Length; i > 0; i--)
             {
                 p[i - 1] = GetPrepadGram();
             }
@@ -365,42 +349,28 @@ namespace MarkovSharp
             return p;
         }
 
-        /// <summary>
-        /// Save the model to file for use later
-        /// </summary>
-        /// <param name="file">The path to a file to store the model in</param>
-        public void Save(string file)
+        /// <summary>Save the model to file for use later</summary>
+        public string Serialize()
         {
-            Logger.Info($"Saving model with {this.Model.Count} model values");
-            var modelJson = JsonConvert.SerializeObject(this, Formatting.Indented);
-            File.WriteAllText(file, modelJson);
-            Logger.Info($"Model saved successfully");
+            Debug.WriteLine($"Saving model with {Model.Count()} model values");
+            return JsonConvert.SerializeObject(this);            
         }
 
-        /// <summary>
-        /// Load a model which has been saved
-        /// </summary>
+        /// <summary>Load a model which has been serialized</summary>
         /// <typeparam name="T">The type of markov model to load the data as</typeparam>
-        /// <param name="file">The path to a file containing saved model data</param>
+        /// <param name="input">The serialized model data.</param>
         /// <param name="level">The level to apply to the loaded model (model will be trained on load)</param>
-        /// <returns></returns>
-        public T Load<T>(string file, int level = 1) where T : IMarkovStrategy<TPhrase, TGram>
+        public T Deserialize<T>(string input, int level = 1) where T : IMarkovStrategy<TPhrase, TGram>
         {
-            Logger.Info($"Loading model from {file}");
-            var model = JsonConvert.DeserializeObject<T>(File.ReadAllText(file));
+            Debug.WriteLine($"Loading model");
+            var model = JsonConvert.DeserializeObject<T>(input);
 
-            Logger.Info($"Model data loaded successfully");
-            Logger.Info($"Assigning new model parameters");
+            Debug.WriteLine("Model data loaded successfully");
+            Debug.WriteLine("Assigning new model parameters");
 
             model.Retrain(level);
 
             return model;
-            //Model = model.Model;
-            //SourceLines = model.SourceLines;
-            //Retrain(level);
-
-            //Logger.Info($"Loaded level {model.Level} model with {model.SourceLines.Count} lines of training data");
-            //return this;
         }
     }
 }
