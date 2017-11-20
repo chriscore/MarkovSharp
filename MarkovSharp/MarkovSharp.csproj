@@ -8,8 +8,8 @@
     <PackageProjectUrl>https://github.com/chriscore/MarkovSharp</PackageProjectUrl>
     <Description>An easy to use C# implementation of an N-state Markov model.</Description>
     <PackageTags>markov model machine learning text generation</PackageTags>
-    <Version>2.3.0</Version>
-    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <Version>2.5.0</Version>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
