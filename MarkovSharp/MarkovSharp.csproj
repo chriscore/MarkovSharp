@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard1.1</TargetFramework>
+    <TargetFramework>netstandard1.0</TargetFramework>
     <Authors>Chris Core</Authors>
     <Company>Chris Corporation</Company>
     <PackageLicenseUrl>https://github.com/chriscore/MarkovSharp/blob/master/README.md</PackageLicenseUrl>
@@ -18,7 +18,6 @@
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
-    <PackageReference Include="System.Threading.Tasks.Parallel" Version="4.3.0" />
   </ItemGroup>
   
 </Project>

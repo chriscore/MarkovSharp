@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using MarkovSharp.TokenisationStrategies;
 using MarkovSharp.Models;
 using Newtonsoft.Json;
@@ -30,7 +27,7 @@ namespace MarkovSharp
                 throw new ArgumentException("Invalid value: level must be a positive integer", nameof(level));
             }
 
-            Model = new ConcurrentDictionary<SourceGrams<TGram>, List<TGram>>();
+            Model = new Dictionary<SourceGrams<TGram>, List<TGram>>();
             SourceLines = new List<TPhrase>();
             Level = level;
             EnsureUniqueWalk = false;
@@ -41,7 +38,7 @@ namespace MarkovSharp
         /// previous words and value is a list of possible outcomes, given that key</summary>
         /// <value>The model.</value>
         [JsonIgnore]
-        public ConcurrentDictionary<SourceGrams<TGram>, List<TGram>> Model { get; set; }
+        public Dictionary<SourceGrams<TGram>, List<TGram>> Model { get; set; }
 
         public List<TPhrase> SourceLines { get; }
 
@@ -78,13 +75,13 @@ namespace MarkovSharp
 
                 Debug.WriteLine($"Learning {newTerms.Count()} lines");
                 // For every sentence which hasnt already been learnt, learn it
-                Parallel.ForEach(source, Learn);
+                foreach (var phrase in source) Learn(phrase);
             }
             else
             {
                 Debug.WriteLine($"Learning {source.Length} lines");
                 // For every sentence, learn it
-                Parallel.ForEach(source, Learn);
+                foreach (var phrase in source) Learn(phrase);
             }
         }
 
@@ -194,7 +191,7 @@ namespace MarkovSharp
             Level = newLevel;
 
             // Empty the model so it can be rebuilt
-            Model = new ConcurrentDictionary<SourceGrams<TGram>, List<TGram>>();
+            Model = new Dictionary<SourceGrams<TGram>, List<TGram>>();
 
             Learn(SourceLines, false);
         }
@@ -212,7 +209,7 @@ namespace MarkovSharp
             {
                 if (!Model.ContainsKey(key))
                 {
-                    Model.TryAdd(key, new List<TGram> {value});
+                    Model.Add(key, new List<TGram> {value});
                 }
                 else
                 {
@@ -355,7 +352,7 @@ namespace MarkovSharp
         /// <summary>Save the model to file for use later</summary>
         public string Serialize()
         {
-            Debug.WriteLine($"Saving model with {Model.Count} model values");
+            Debug.WriteLine($"Saving model with {Model.Count()} model values");
             return JsonConvert.SerializeObject(this);            
         }
 
