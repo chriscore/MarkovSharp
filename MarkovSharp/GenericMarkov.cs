@@ -68,18 +68,18 @@ namespace MarkovSharp
         
         public void Learn(IEnumerable<TPhrase> phrases, bool ignoreAlreadyLearnt = true)
         {
-            var source = phrases.ToArray();
+            var source = phrases.ToList();
             if (ignoreAlreadyLearnt)
             {
-                var newTerms = source.Where(s => !SourceLines.Contains(s));
+                var newTerms = source.Where(s => !SourceLines.Contains(s)).ToList();
 
-                Debug.WriteLine($"Learning {newTerms.Count()} lines");
+                Debug.WriteLine($"Learning {newTerms.Count} lines");
                 // For every sentence which hasnt already been learnt, learn it
-                foreach (var phrase in source) Learn(phrase);
+                foreach (var phrase in newTerms) Learn(phrase);
             }
             else
             {
-                Debug.WriteLine($"Learning {source.Length} lines");
+                Debug.WriteLine($"Learning {source.Count} lines");
                 // For every sentence, learn it
                 foreach (var phrase in source) Learn(phrase);
             }
