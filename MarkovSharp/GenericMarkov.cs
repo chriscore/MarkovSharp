@@ -38,7 +38,7 @@ namespace MarkovSharp
 
             Model = new ConcurrentDictionary<SourceGrams<TUnigram>, List<TUnigram>>();
             UnigramSelector = new WeightedRandomUnigramSelector<TUnigram>();
-            SourceLines = new List<TPhrase>();
+            SourcePhrases = new List<TPhrase>();
             Level = level;
             EnsureUniqueWalk = false;
         }
@@ -54,7 +54,7 @@ namespace MarkovSharp
         /// </summary>
         public IUnigramSelector<TUnigram> UnigramSelector { get; set; }
 
-        public List<TPhrase> SourceLines { get; set; }
+        public List<TPhrase> SourcePhrases { get; set; }
 
         /// <summary>
         /// Defines how to split the phrase to ngrams
@@ -70,9 +70,9 @@ namespace MarkovSharp
         /// <returns></returns>
         public abstract TPhrase RebuildPhrase(IEnumerable<TUnigram> tokens);
 
-        public abstract TUnigram GetTerminatorGram();
+        public abstract TUnigram GetTerminatorUnigram();
 
-        public abstract TUnigram GetPrepadGram();
+        public abstract TUnigram GetPrepadUnigram();
 
         /// <summary>
         /// Set to true to ensure that all lines generated are different and not same as the training data.
@@ -88,7 +88,7 @@ namespace MarkovSharp
         {
             if (ignoreAlreadyLearnt)
             {
-                var newTerms = phrases.Where(s => !SourceLines.Contains(s));
+                var newTerms = phrases.Where(s => !SourcePhrases.Contains(s));
 
                 Logger.Info($"Learning {newTerms.Count()} lines");
                 // For every sentence which hasnt already been learnt, learn it
@@ -110,7 +110,7 @@ namespace MarkovSharp
                 return;
             }
 
-            // Ignore particularly short sentences
+            // Ignore particularly short phrases
             if (SplitTokens(phrase).Count() < Level)
             {
                 Logger.Info($"Phrase {phrase} too short - skipped");
@@ -119,10 +119,10 @@ namespace MarkovSharp
 
             // Add it to the source lines so we can ignore it 
             // when learning in future
-            if (!SourceLines.Contains(phrase))
+            if (!SourcePhrases.Contains(phrase))
             {
                 Logger.Debug($"Adding phrase {phrase} to source lines");
-                SourceLines.Add(phrase);
+                SourcePhrases.Add(phrase);
             }
             
             // Split the sentence to an array of words
@@ -143,14 +143,14 @@ namespace MarkovSharp
                 catch (IndexOutOfRangeException e)
                 {
                     Logger.Warn($"Caught an exception: {e}");
-                    previous = GetPrepadGram();
+                    previous = GetPrepadUnigram();
                     lastCol.Add(previous);
                 }
             }
 
             Logger.Debug($"Reached final key for phrase {phrase}");
             var finalKey = new SourceGrams<TUnigram>(lastCol.ToArray());
-            AddOrCreate(finalKey, GetTerminatorGram());
+            AddOrCreate(finalKey, GetTerminatorUnigram());
         }
 
         /// <summary>
@@ -174,7 +174,7 @@ namespace MarkovSharp
                         // and we effectively would be looking at tokens before the beginning phrase
                         if (i - j < 0)
                         {
-                            previousCol.Add(GetPrepadGram());
+                            previousCol.Add(GetPrepadUnigram());
                         }
                         else 
                         {
@@ -184,7 +184,7 @@ namespace MarkovSharp
                     }
                     catch (IndexOutOfRangeException)
                     {
-                        previous = GetPrepadGram();
+                        previous = GetPrepadUnigram();
                         previousCol.Add(previous);
                     }
                 }
@@ -214,7 +214,7 @@ namespace MarkovSharp
             // Empty the model so it can be rebuilt
             Model = new ConcurrentDictionary<SourceGrams<TUnigram>, List<TUnigram>>();
 
-            Learn(SourceLines, false);
+            Learn(SourcePhrases, false);
         }
 
         private object lockObj = new object();
@@ -249,7 +249,7 @@ namespace MarkovSharp
         {
             if (seed == null)
             {
-                seed = RebuildPhrase(new List<TUnigram>() {GetPrepadGram()});
+                seed = RebuildPhrase(new List<TUnigram>() {GetPrepadUnigram()});
             }
 
             Logger.Info($"Walking to return {lines} phrases from {Model.Count} states");
@@ -271,7 +271,7 @@ namespace MarkovSharp
                     break;
                 }
                 var result = WalkLine(seed);
-                if ((!EnsureUniqueWalk || !SourceLines.Contains(result)) && (!EnsureUniqueWalk || !sentences.Contains(result)))
+                if ((!EnsureUniqueWalk || !SourcePhrases.Contains(result)) && (!EnsureUniqueWalk || !sentences.Contains(result)))
                 {
                     sentences.Add(result);
                     created++;
@@ -297,7 +297,7 @@ namespace MarkovSharp
 
             // If the start of the generated text has been seeded,
             // append that before generating the rest
-            if (!seed.Equals(GetPrepadGram()))
+            if (!seed.Equals(GetPrepadUnigram()))
             {
                 built.AddRange(SplitTokens(seed));
             }
@@ -367,42 +367,10 @@ namespace MarkovSharp
             }
             for (int i = Level - input.Length; i > 0; i--)
             {
-                p[i - 1] = GetPrepadGram();
+                p[i - 1] = GetPrepadUnigram();
             }
 
             return p;
-        }
-
-        /// <summary>
-        /// Save the model to file for use later
-        /// </summary>
-        /// <param name="file">The path to a file to store the model in</param>
-        public void Save(string file)
-        {
-            Logger.Info($"Saving model with {this.Model.Count} model values");
-            var modelJson = JsonConvert.SerializeObject(this, Formatting.Indented);
-            File.WriteAllText(file, modelJson);
-            Logger.Info("Model saved successfully");
-        }
-
-        /// <summary>
-        /// Load a model which has been saved
-        /// </summary>
-        /// <typeparam name="T">The type of markov model to load the data as</typeparam>
-        /// <param name="file">The path to a file containing saved model data</param>
-        /// <param name="level">The level to apply to the loaded model (model will be trained on load)</param>
-        /// <returns></returns>
-        public T Load<T>(string file, int level = 1) where T : IMarkovStrategy<TPhrase, TUnigram>
-        {
-            Logger.Info($"Loading model from {file}");
-            var model = JsonConvert.DeserializeObject<T>(File.ReadAllText(file));
-
-            Logger.Info("Model data loaded successfully");
-            Logger.Info("Assigning new model parameters");
-
-            model.Retrain(level);
-
-            return model;
         }
 
         public IEnumerable<StateStatistic<TUnigram>> GetStatistics()

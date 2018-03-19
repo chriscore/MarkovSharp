@@ -3,14 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MarkovSharp.Models;
 
 namespace MarkovSharp.TokenisationStrategies
 {
-    public interface IMarkovStrategy<TPhrase, TGram>
+    public interface IMarkovStrategy<TPhrase, TUnigram>
     {
-        IEnumerable<TGram> SplitTokens(TPhrase input);
+        IEnumerable<TUnigram> SplitTokens(TPhrase input);
         
-        TPhrase RebuildPhrase(IEnumerable<TGram> tokens);
+        TPhrase RebuildPhrase(IEnumerable<TUnigram> tokens);
 
         void Learn(IEnumerable<TPhrase> phrases, bool ignoreAlreadyLearnt = true);
         
@@ -20,15 +21,12 @@ namespace MarkovSharp.TokenisationStrategies
         
         IEnumerable<TPhrase> Walk(int lines = 1, TPhrase seed = default(TPhrase));
         
-        List<TGram> GetMatches(TPhrase input);
-        
-        void Save(string file);
+        List<TUnigram> GetMatches(TPhrase input);
 
-        T Load<T>(string file, int level = 1) where T : IMarkovStrategy<TPhrase, TGram>;
+        TUnigram GetTerminatorUnigram();
 
-        TGram GetTerminatorGram();
+        TUnigram GetPrepadUnigram();
 
-        TGram GetPrepadGram();
-        //int GetLevel();
+        IEnumerable<StateStatistic<TUnigram>> GetStatistics();
     }
 }

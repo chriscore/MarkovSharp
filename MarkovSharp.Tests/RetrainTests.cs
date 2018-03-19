@@ -28,10 +28,10 @@ namespace MarkovSharp.Tests
         {
             var model = new StringMarkov();
             model.Learn(ExampleData);
-            var oldLines = new List<string>(model.SourceLines);
+            var oldLines = new List<string>(model.SourcePhrases);
 
             model.Retrain(retrainDepth);
-            CollectionAssert.AreEquivalent(oldLines, model.SourceLines);
+            CollectionAssert.AreEquivalent(oldLines, model.SourcePhrases);
         }
 
         [TestCase(1, false)]

@@ -16,7 +16,7 @@ namespace MarkovSharp.TokenisationStrategies
         {
             if (input == null)
             {
-                return new List<string>() { GetPrepadGram() };
+                return new List<string>() { GetPrepadUnigram() };
             }
 
             return input?.Split(' ');
@@ -27,12 +27,12 @@ namespace MarkovSharp.TokenisationStrategies
             return string.Join(" ", tokens);
         }
 
-        public override string GetTerminatorGram()
+        public override string GetTerminatorUnigram()
         {
             return null;
         }
 
-        public override string GetPrepadGram()
+        public override string GetPrepadUnigram()
         {
             return "";
         }

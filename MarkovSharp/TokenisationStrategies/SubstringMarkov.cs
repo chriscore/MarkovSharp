@@ -16,7 +16,7 @@ namespace MarkovSharp.TokenisationStrategies
         {
             if (string.IsNullOrEmpty(phrase))
             {
-                return new List<char?> { GetPrepadGram() };
+                return new List<char?> { GetPrepadUnigram() };
             }
             
             return phrase.Select(c => new char?(c));
@@ -28,15 +28,15 @@ namespace MarkovSharp.TokenisationStrategies
                 .Where(t => t != null)
                 .Select(t => t.Value).ToArray();
             
-            return new string(transformed).Replace(new string(new char[] { GetPrepadGram().Value }), "");
+            return new string(transformed).Replace(new string(new char[] { GetPrepadUnigram().Value }), "");
         }
 
-        public override char? GetTerminatorGram()
+        public override char? GetTerminatorUnigram()
         {
             return null;
         }
 
-        public override char? GetPrepadGram()
+        public override char? GetPrepadUnigram()
         {
             return '\0';
         }

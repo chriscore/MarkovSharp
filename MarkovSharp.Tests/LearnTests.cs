@@ -21,8 +21,8 @@ namespace MarkovSharp.Tests
             var model = new StringMarkov();
             model.Learn("");
 
-            CollectionAssert.AreEquivalent(new List<string>(), model.SourceLines);
-            Assert.AreEqual(0, model.SourceLines.Count);
+            CollectionAssert.AreEquivalent(new List<string>(), model.SourcePhrases);
+            Assert.AreEqual(0, model.SourcePhrases.Count);
             Assert.AreEqual(0, model.Model.Sum(x => x.Value.Count));
         }
 
@@ -39,8 +39,8 @@ namespace MarkovSharp.Tests
             var model = new StringMarkov();
             model.Learn(null);
 
-            CollectionAssert.AreEquivalent(new List<string>(), model.SourceLines);
-            Assert.AreEqual(0, model.SourceLines.Count);
+            CollectionAssert.AreEquivalent(new List<string>(), model.SourcePhrases);
+            Assert.AreEqual(0, model.SourcePhrases.Count);
             Assert.AreEqual(0, model.Model.Sum(x => x.Value.Count));
         }
 
@@ -50,8 +50,8 @@ namespace MarkovSharp.Tests
             var model = new StringMarkov();
             model.Learn(ExampleData);
 
-            Assert.AreEqual(ExampleData.Count(), model.SourceLines.Count);
-            CollectionAssert.AreEquivalent(ExampleData, model.SourceLines);
+            Assert.AreEqual(ExampleData.Count(), model.SourcePhrases.Count);
+            CollectionAssert.AreEquivalent(ExampleData, model.SourcePhrases);
         }
 
         [Test]
@@ -60,11 +60,11 @@ namespace MarkovSharp.Tests
             var model = new StringMarkov();
             model.Learn(ExampleData);
             
-            Assert.AreEqual(ExampleData.Count(s => s.Split(' ').Length > model.Level), model.SourceLines.Count);
-            CollectionAssert.AreEquivalent(ExampleData.Where(s => s.Split(' ').Length > model.Level), model.SourceLines);
+            Assert.AreEqual(ExampleData.Count(s => s.Split(' ').Length > model.Level), model.SourcePhrases.Count);
+            CollectionAssert.AreEquivalent(ExampleData.Where(s => s.Split(' ').Length > model.Level), model.SourcePhrases);
 
             model.Learn("I do not like green eggs and hams");
-            Assert.AreEqual(ExampleData.Count() + 1, model.SourceLines.Count);
+            Assert.AreEqual(ExampleData.Count() + 1, model.SourcePhrases.Count);
         }
 
         [Test]
@@ -74,11 +74,11 @@ namespace MarkovSharp.Tests
             model.Learn(ExampleData);
             model.Learn(ExampleData);
 
-            var e1 = ExampleData.Except(model.SourceLines).ToList();
+            var e1 = ExampleData.Except(model.SourcePhrases).ToList();
 
-            Assert.AreEqual(ExampleData.Count(), model.SourceLines.Count);
-            Assert.That(ExampleData.ToList(), Is.EquivalentTo(model.SourceLines));
-            Assert.That(model.SourceLines, Is.Unique);
+            Assert.AreEqual(ExampleData.Count(), model.SourcePhrases.Count);
+            Assert.That(ExampleData.ToList(), Is.EquivalentTo(model.SourcePhrases));
+            Assert.That(model.SourcePhrases, Is.Unique);
         }
 
         [Test]
@@ -88,10 +88,10 @@ namespace MarkovSharp.Tests
             model.Learn("Testing the model");
             model.Learn("Testing the model");
 
-            CollectionAssert.AreEquivalent(new List<string> { "Testing the model" }, model.SourceLines);
-            Assert.AreEqual(1, model.SourceLines.Count);
+            CollectionAssert.AreEquivalent(new List<string> { "Testing the model" }, model.SourcePhrases);
+            Assert.AreEqual(1, model.SourcePhrases.Count);
             Assert.AreEqual(8, model.Model.Sum(x => x.Value.Count));
-            Assert.That(model.SourceLines, Is.Unique);
+            Assert.That(model.SourcePhrases, Is.Unique);
         }
 
         [Test]
@@ -100,7 +100,7 @@ namespace MarkovSharp.Tests
             var model = new StringMarkov(5);
             model.Learn("A short sentence");
 
-            CollectionAssert.AreEquivalent(new List<string>(), model.SourceLines);
+            CollectionAssert.AreEquivalent(new List<string>(), model.SourcePhrases);
         }
 
         [Test]
