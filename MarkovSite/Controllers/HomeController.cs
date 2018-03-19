@@ -77,15 +77,15 @@ namespace MarkovSite.Controllers
 
                 if (string.IsNullOrEmpty(deserialisedResponse.SeedText))
                 {
-                    deserialisedResponse.SeedText = model.GetPrepadGram();
+                    deserialisedResponse.SeedText = model.GetPrepadUnigram();
                 }
 
                 try
                 {
                     var suggestions = model.GetMatches(deserialisedResponse.SeedText.Trim())
                         .Where(a => 
-                            a != model.GetPrepadGram()
-                            && a != model.GetTerminatorGram()
+                            a != model.GetPrepadUnigram()
+                            && a != model.GetTerminatorUnigram()
                         )
                         .GroupBy(a => a)
                         .OrderByDescending(a => a.Count())

@@ -17,12 +17,12 @@ namespace MarkovSharp.TokenisationStrategies
 
         public int Channel { get; set; }
 
-        public override Note GetTerminatorGram()
+        public override Note GetTerminatorUnigram()
         {
             return null;
         }
 
-        public override Note GetPrepadGram()
+        public override Note GetPrepadUnigram()
         {
             return new Note();
         }
