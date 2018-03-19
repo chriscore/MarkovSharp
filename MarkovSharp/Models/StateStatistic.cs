@@ -8,10 +8,10 @@ namespace MarkovSharp.Models
 {
     public class StateStatistic<TGram>
     {
-        internal StateStatistic(SourceGrams<TGram> state, IEnumerable<TGram> valuesAtState)
+        internal StateStatistic(NgramContainer<TGram> state, IEnumerable<TGram> valuesAtState)
         {
-            State = state.Before;
-            var groupedValues = valuesAtState.GroupBy(x => x);
+            State = state.Ngrams;
+            var groupedValues = valuesAtState.GroupBy(x => x).ToList();
             Next = groupedValues.Select(a => new NgramStatistic<TGram>
             {
                 Value = a.Key,
@@ -19,6 +19,7 @@ namespace MarkovSharp.Models
                 Probability = Math.Round(((double)a.Count() / (double)groupedValues.Sum(x => x.Count())) * 100, 2)
             }).OrderByDescending(x => x.Probability);
         }
+
         public TGram[] State { get; set; }
         public IEnumerable<NgramStatistic<TGram>> Next { get; set; }
     }

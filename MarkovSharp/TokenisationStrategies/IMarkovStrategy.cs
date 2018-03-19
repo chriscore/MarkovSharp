@@ -9,6 +9,10 @@ namespace MarkovSharp.TokenisationStrategies
 {
     public interface IMarkovStrategy<TPhrase, TUnigram>
     {
+        Type UnigramType { get; }
+
+        Type PhraseType { get; }
+
         IEnumerable<TUnigram> SplitTokens(TPhrase input);
         
         TPhrase RebuildPhrase(IEnumerable<TUnigram> tokens);

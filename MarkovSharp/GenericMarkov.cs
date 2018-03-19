@@ -36,18 +36,20 @@ namespace MarkovSharp
                 throw new ArgumentException("Invalid value: level must be a positive integer", nameof(level));
             }
 
-            Model = new ConcurrentDictionary<SourceGrams<TUnigram>, List<TUnigram>>();
+            Chain = new MarkovChain<TUnigram>();
             UnigramSelector = new WeightedRandomUnigramSelector<TUnigram>();
             SourcePhrases = new List<TPhrase>();
             Level = level;
             EnsureUniqueWalk = false;
         }
 
-        // Dictionary containing the model data. The key is the N number of
-        // previous words and value is a list of possible outcomes, given that key
-        [JsonIgnore]
-        public ConcurrentDictionary<SourceGrams<TUnigram>, List<TUnigram>> Model { get; set; }
+        public Type UnigramType => typeof(TUnigram);
+        public Type PhraseType => typeof(TPhrase);
         
+        // Chain containing the model data. The key is the N number of
+        // previous words and value is a list of possible outcomes, given that key
+        public MarkovChain<TUnigram> Chain { get; set; }
+
         /// <summary>
         /// Used for defining a strategy to select the next value when calling Walk()
         /// Set this to something else for different behaviours
@@ -149,8 +151,8 @@ namespace MarkovSharp
             }
 
             Logger.Debug($"Reached final key for phrase {phrase}");
-            var finalKey = new SourceGrams<TUnigram>(lastCol.ToArray());
-            AddOrCreate(finalKey, GetTerminatorUnigram());
+            var finalKey = new NgramContainer<TUnigram>(lastCol.ToArray());
+            Chain.AddOrCreate(finalKey, GetTerminatorUnigram());
         }
 
         /// <summary>
@@ -190,10 +192,10 @@ namespace MarkovSharp
                 }
 
                 // create the composite key based on previous tokens
-                var key = new SourceGrams<TUnigram>(previousCol.ToArray());
+                var key = new NgramContainer<TUnigram>(previousCol.ToArray());
 
                 // add the current token to the markov model at the composite key
-                AddOrCreate(key, current);
+                Chain.AddOrCreate(key, current);
             }
         }
 
@@ -212,32 +214,12 @@ namespace MarkovSharp
             Level = newLevel;
 
             // Empty the model so it can be rebuilt
-            Model = new ConcurrentDictionary<SourceGrams<TUnigram>, List<TUnigram>>();
+            Chain = new MarkovChain<TUnigram>();
 
             Learn(SourcePhrases, false);
         }
 
-        private object lockObj = new object();
-
-        /// <summary>
-        /// Add a TGram to the markov models store with a composite key of the previous [Level] number of TGrams
-        /// </summary>
-        /// <param name="key">The composite key under which to add the TGram value</param>
-        /// <param name="value">The value to add to the store</param>
-        private void AddOrCreate(SourceGrams<TUnigram> key, TUnigram value)
-        {
-            lock (lockObj)
-            {
-                if (!Model.ContainsKey(key))
-                {
-                    Model.TryAdd(key, new List<TUnigram> {value});
-                }
-                else
-                {
-                    Model[key].Add(value);
-                }
-            }
-        }
+        
 
         /// <summary>
         /// Generate a collection of phrase output data based on the current model
@@ -252,15 +234,14 @@ namespace MarkovSharp
                 seed = RebuildPhrase(new List<TUnigram>() {GetPrepadUnigram()});
             }
 
-            Logger.Info($"Walking to return {lines} phrases from {Model.Count} states");
+            Logger.Info($"Walking to return {lines} phrases from {Chain.Count} states");
             if (lines < 1)
             {
                 throw new ArgumentException("Invalid argument - line count for walk must be a positive integer", nameof(lines));
             }
 
             var sentences = new List<TPhrase>();
-
-            //for (var z = 0; z < lines; z++)k
+            
             int genCount = 0;
             int created = 0;
             while (created < lines)
@@ -288,12 +269,12 @@ namespace MarkovSharp
         /// <returns></returns>
         private TPhrase WalkLine(TPhrase seed)
         {
-            var arraySeed = PadArrayLow(SplitTokens(seed)?.ToArray());
-            List<TUnigram> built = new List<TUnigram>();
+            var paddedSeed = PadArrayLow(SplitTokens(seed)?.ToArray());
+            var built = new List<TUnigram>();
 
             // Allocate a queue to act as the memory, which is n 
             // levels deep of previous words that were used
-            var q = new Queue(arraySeed);
+            var q = new Queue(paddedSeed);
 
             // If the start of the generated text has been seeded,
             // append that before generating the rest
@@ -304,12 +285,11 @@ namespace MarkovSharp
 
             while (built.Count < 1500)
             {
-                // Choose a new word to add from the model
-                //Logger.Info($"In Walkline loop: builtcount = {built.Count}");
-                var key = new SourceGrams<TUnigram>(q.Cast<TUnigram>().ToArray());
-                if (Model.ContainsKey(key))
+                // Choose a new token to add from the model
+                var key = new NgramContainer<TUnigram>(q.Cast<TUnigram>().ToArray());
+                if (Chain.Contains(key))
                 {
-                    var chosen = UnigramSelector.SelectUnigram(Model[key]);
+                    var chosen = UnigramSelector.SelectUnigram(Chain.GetValuesForKey(key));
 
                     q.Dequeue();
                     q.Enqueue(chosen);
@@ -338,8 +318,18 @@ namespace MarkovSharp
                 inputArray = PadArrayLow(inputArray);
             }
 
-            var key = new SourceGrams<TUnigram>(inputArray);
-            var chosen = Model[key];
+            var key = new NgramContainer<TUnigram>(inputArray);
+            var chosen = new List<TUnigram>();
+
+            try
+            {
+                chosen = Chain.GetValuesForKey(key);
+            }
+            catch (KeyNotFoundException e)
+            {
+                throw new KeyNotFoundException("No sequence could be found that matched the provided input", e);
+            }
+
             return chosen;
         }
 
@@ -359,13 +349,13 @@ namespace MarkovSharp
             }
 
             var p = new TUnigram[Level];
-            int j = 0;
-            for (int i = (Level - input.Length); i < (Level); i++)
+            var j = 0;
+            for (var i = (Level - input.Length); i < (Level); i++)
             {
                 p[i] = input[j];
                 j++;
             }
-            for (int i = Level - input.Length; i > 0; i--)
+            for (var i = Level - input.Length; i > 0; i--)
             {
                 p[i - 1] = GetPrepadUnigram();
             }
@@ -375,10 +365,7 @@ namespace MarkovSharp
 
         public IEnumerable<StateStatistic<TUnigram>> GetStatistics()
         {
-            var stats = Model.Keys.Select(a => new StateStatistic<TUnigram>(a, Model[a]))
-                .OrderByDescending(a => a.Next.Sum(x => x.Count));
-
-            return stats;
+            return Chain.GetStatistics();
         }
     }
 }

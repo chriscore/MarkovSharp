@@ -19,7 +19,7 @@ namespace MarkovSharp.Tests
             model.Learn(ExampleData);
 
             model.Retrain(retrainDepth);
-            Assert.AreEqual(retrainDepth, model.Model.Max(a => a.Key.Before.Length));
+            Assert.AreEqual(retrainDepth, model.Chain.ChainDictionary.Max(a => a.Key.Ngrams.Length));
         }
 
         [TestCase(1)]
@@ -41,19 +41,19 @@ namespace MarkovSharp.Tests
         {
             var model = new StringMarkov();
             model.Learn(ExampleData);
-            var dict = new ConcurrentDictionary<SourceGrams<string>, List<string>>(model.Model); // this will break for non string type models during testing until fixed
+            var dict = new ConcurrentDictionary<NgramContainer<string>, List<string>>(model.Chain.ChainDictionary); // this will break for non string type models during testing until fixed
 
             model.Retrain(retrainDepth);
 
             if (expectSameModel)
             {
                 //CollectionAssert.AreEquivalent(dict, model.Model);
-                Assert.AreEqual(dict.Sum(a => a.Key.Before.Count()), model.Model.Sum(a => a.Key.Before.Count()));
+                Assert.AreEqual(dict.Sum(a => a.Key.Ngrams.Count()), model.Chain.ChainDictionary.Sum(a => a.Key.Ngrams.Count()));
             }
             else
             {
                 //CollectionAssert.AreNotEquivalent(dict, model.Model);
-                Assert.AreNotEqual(dict.Sum(a => a.Key.Before.Count()), model.Model.Sum(a => a.Key.Before.Count()));
+                Assert.AreNotEqual(dict.Sum(a => a.Key.Ngrams.Count()), model.Chain.ChainDictionary.Sum(a => a.Key.Ngrams.Count()));
             }
         }
 
