@@ -382,7 +382,7 @@ namespace MarkovSharp
             Logger.Info($"Saving model with {this.Model.Count} model values");
             var modelJson = JsonConvert.SerializeObject(this, Formatting.Indented);
             File.WriteAllText(file, modelJson);
-            Logger.Info($"Model saved successfully");
+            Logger.Info("Model saved successfully");
         }
 
         /// <summary>
@@ -397,18 +397,20 @@ namespace MarkovSharp
             Logger.Info($"Loading model from {file}");
             var model = JsonConvert.DeserializeObject<T>(File.ReadAllText(file));
 
-            Logger.Info($"Model data loaded successfully");
-            Logger.Info($"Assigning new model parameters");
+            Logger.Info("Model data loaded successfully");
+            Logger.Info("Assigning new model parameters");
 
             model.Retrain(level);
 
             return model;
-            //Model = model.Model;
-            //SourceLines = model.SourceLines;
-            //Retrain(level);
+        }
 
-            //Logger.Info($"Loaded level {model.Level} model with {model.SourceLines.Count} lines of training data");
-            //return this;
+        public IEnumerable<StateStatistic<TUnigram>> GetStatistics()
+        {
+            var stats = Model.Keys.Select(a => new StateStatistic<TUnigram>(a, Model[a]))
+                .OrderByDescending(a => a.Next.Sum(x => x.Count));
+
+            return stats;
         }
     }
 }
