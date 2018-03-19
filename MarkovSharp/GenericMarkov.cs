@@ -289,8 +289,17 @@ namespace MarkovSharp
                 var key = new NgramContainer<TUnigram>(q.Cast<TUnigram>().ToArray());
                 if (Chain.Contains(key))
                 {
-                    var chosen = UnigramSelector.SelectUnigram(Chain.GetValuesForKey(key));
+                    TUnigram chosen;
 
+                    if (built.Count == 0)
+                    {
+                        chosen = new UnweightedRandomUnigramSelector<TUnigram>().SelectUnigram(Chain.GetValuesForKey(key));
+                    }
+                    else
+                    {
+                        chosen = UnigramSelector.SelectUnigram(Chain.GetValuesForKey(key));
+                    }
+                    
                     q.Dequeue();
                     q.Enqueue(chosen);
                     built.Add(chosen);
