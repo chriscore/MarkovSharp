@@ -23,7 +23,7 @@ namespace MarkovSharp.Tests
 
             CollectionAssert.AreEquivalent(new List<string>(), model.SourcePhrases);
             Assert.AreEqual(0, model.SourcePhrases.Count);
-            Assert.AreEqual(0, model.Model.Sum(x => x.Value.Count));
+            Assert.AreEqual(0, model.Chain.ChainDictionary.Sum(x => x.Value.Count));
         }
 
         [Test]
@@ -41,7 +41,7 @@ namespace MarkovSharp.Tests
 
             CollectionAssert.AreEquivalent(new List<string>(), model.SourcePhrases);
             Assert.AreEqual(0, model.SourcePhrases.Count);
-            Assert.AreEqual(0, model.Model.Sum(x => x.Value.Count));
+            Assert.AreEqual(0, model.Chain.ChainDictionary.Sum(x => x.Value.Count));
         }
 
         [Test]
@@ -51,7 +51,7 @@ namespace MarkovSharp.Tests
             model.Learn(ExampleData);
 
             Assert.AreEqual(ExampleData.Count(), model.SourcePhrases.Count);
-            CollectionAssert.AreEquivalent(ExampleData, model.SourcePhrases);
+            CollectionAssert.AreEquivalent(ExampleData.ToList(), model.SourcePhrases);
         }
 
         [Test]
@@ -73,9 +73,7 @@ namespace MarkovSharp.Tests
             var model = new StringMarkov();
             model.Learn(ExampleData);
             model.Learn(ExampleData);
-
-            var e1 = ExampleData.Except(model.SourcePhrases).ToList();
-
+            
             Assert.AreEqual(ExampleData.Count(), model.SourcePhrases.Count);
             Assert.That(ExampleData.ToList(), Is.EquivalentTo(model.SourcePhrases));
             Assert.That(model.SourcePhrases, Is.Unique);
@@ -90,7 +88,7 @@ namespace MarkovSharp.Tests
 
             CollectionAssert.AreEquivalent(new List<string> { "Testing the model" }, model.SourcePhrases);
             Assert.AreEqual(1, model.SourcePhrases.Count);
-            Assert.AreEqual(8, model.Model.Sum(x => x.Value.Count));
+            Assert.AreEqual(8, model.Chain.ChainDictionary.Sum(x => x.Value.Count));
             Assert.That(model.SourcePhrases, Is.Unique);
         }
 
@@ -109,7 +107,7 @@ namespace MarkovSharp.Tests
             var model = new StringMarkov(5);
             model.Learn("A short sentence");
             
-            Assert.AreEqual(0, model.Model.Count, string.Join(", ", model.Model.Select(a => string.Join(" ", a))));
+            Assert.AreEqual(0, model.Chain.ChainDictionary.Count, string.Join(", ", model.Chain.ChainDictionary.Select(a => string.Join(" ", a))));
         }
     }
 }

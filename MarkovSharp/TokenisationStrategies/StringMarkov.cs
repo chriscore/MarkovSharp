@@ -19,7 +19,8 @@ namespace MarkovSharp.TokenisationStrategies
                 return new List<string>() { GetPrepadUnigram() };
             }
 
-            return input?.Split(' ');
+            input = input.Trim();
+            return input.Split(' ');
         }
 
         public override string RebuildPhrase(IEnumerable<string> tokens)
