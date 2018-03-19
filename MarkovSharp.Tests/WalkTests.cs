@@ -101,7 +101,7 @@ namespace MarkovSharp.Tests
             model.Learn(ExampleData);
             model.EnsureUniqueWalk = true;
 
-            var results = model.Walk(1000);
+            var results = model.Walk(500);
             Assert.AreEqual(results.Count(), results.Distinct().Count());
         }
 
