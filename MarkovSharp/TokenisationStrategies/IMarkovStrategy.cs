@@ -32,5 +32,7 @@ namespace MarkovSharp.TokenisationStrategies
         TUnigram GetPrepadUnigram();
 
         IEnumerable<StateStatistic<TUnigram>> GetStatistics();
+
+        ChainPhraseProbability<TPhrase> GetFit(TPhrase test);
     }
 }

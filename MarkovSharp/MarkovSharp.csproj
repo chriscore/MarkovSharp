@@ -59,6 +59,7 @@
     <Compile Include="Components\UnweightedRandomUnigramSelector.cs" />
     <Compile Include="Components\WeightedRandomUnigramSelector.cs" />
     <Compile Include="GenericMarkov.cs" />
+    <Compile Include="Models\ChainPhraseProbability.cs" />
     <Compile Include="Models\MarkovChain.cs" />
     <Compile Include="Models\NgramStatistic.cs" />
     <Compile Include="Models\NgramWrapper.cs" />

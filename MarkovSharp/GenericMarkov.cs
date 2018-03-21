@@ -376,5 +376,59 @@ namespace MarkovSharp
         {
             return Chain.GetStatistics();
         }
+
+        public virtual ChainPhraseProbability<TPhrase> GetFit(TPhrase testData)
+        {
+            var testUnigrams = SplitTokens(testData).ToArray();
+
+            var results = new Dictionary<TPhrase, bool>();
+
+            for (int i = 0; i < testUnigrams.Count(); i++)
+            {
+                var testCase = new List<TUnigram>();
+
+                for (int j = 0; j < Level; j++)
+                {
+                    var index = i + j;
+                    if (index >= testUnigrams.Count())
+                    {
+                        break;
+                    }
+                    
+                    testCase.Add(testUnigrams[i + j]);
+                }
+
+                if (testCase.Count() == Level)
+                {
+                    var testPhrase = RebuildPhrase(testCase);
+
+                    try
+                    {
+                        var testResults = GetMatches(testPhrase);
+                        if (testResults.Any())
+                        {
+                            results[testPhrase] = true;
+                        }
+                        else
+                        {
+                            results[testPhrase] = false;
+                        }
+                    }
+                    catch (KeyNotFoundException e)
+                    {
+                        results[testPhrase] = false;
+                    }
+                }
+            }
+
+            var matchCount = results.Count(a => a.Value);
+            var probability = Math.Round((double)matchCount / results.Count * 100, 2);
+
+            return new ChainPhraseProbability<TPhrase>
+            {
+                Probability = probability,
+                Raw = results
+            };
+        }
     }
 }

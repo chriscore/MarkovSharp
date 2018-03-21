@@ -58,6 +58,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BaseMarkovTests.cs" />
+    <Compile Include="GetFitTests.cs" />
     <Compile Include="MarkovTests.cs" />
     <Compile Include="LearnTests.cs" />
     <Compile Include="MidiMarkovTests.cs" />
