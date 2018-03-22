@@ -53,6 +53,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Components\AlphabeticUnigramSelector.cs" />
+    <Compile Include="Components\AlphabeticUnigramSelectorDesc.cs" />
     <Compile Include="Components\IUnigramSelector.cs" />
     <Compile Include="Components\LeastPopularUnigramSelector.cs" />
     <Compile Include="Components\MostPopularUnigramSelector.cs" />
@@ -64,6 +66,7 @@
     <Compile Include="Models\NgramStatistic.cs" />
     <Compile Include="Models\NgramWrapper.cs" />
     <Compile Include="Models\StateStatistic.cs" />
+    <Compile Include="Models\NgramChainMatch.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TokenisationStrategies\IMarkovStrategy.cs" />
     <Compile Include="TokenisationStrategies\SanfordMidiMarkov.cs" />

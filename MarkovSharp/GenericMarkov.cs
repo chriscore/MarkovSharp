@@ -1,16 +1,12 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using log4net;
+﻿using log4net;
 using MarkovSharp.Components;
-using MarkovSharp.TokenisationStrategies;
-using Newtonsoft.Json;
 using MarkovSharp.Models;
+using MarkovSharp.TokenisationStrategies;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 [assembly: log4net.Config.XmlConfigurator(ConfigFile = "log4net.config", Watch = true)]
 
@@ -335,9 +331,7 @@ namespace MarkovSharp
                 chosen = Chain.GetValuesForKey(key);
             }
             catch (KeyNotFoundException e)
-            {
-                throw new KeyNotFoundException("No sequence could be found that matched the provided input", e);
-            }
+            { }
 
             return chosen;
         }
@@ -381,7 +375,7 @@ namespace MarkovSharp
         {
             var testUnigrams = SplitTokens(testData).ToArray();
 
-            var results = new Dictionary<TPhrase, bool>();
+            var results = new List<NgramChainMatch<TPhrase>>();
 
             for (int i = 0; i < testUnigrams.Count(); i++)
             {
@@ -407,28 +401,55 @@ namespace MarkovSharp
                         var testResults = GetMatches(testPhrase);
                         if (testResults.Any())
                         {
-                            results[testPhrase] = true;
+                            results.Add(new NgramChainMatch<TPhrase>(testPhrase, true));
                         }
                         else
                         {
-                            results[testPhrase] = false;
+                            results.Add(new NgramChainMatch<TPhrase>(testPhrase, false));
                         }
                     }
-                    catch (KeyNotFoundException e)
+                    catch (KeyNotFoundException)
                     {
-                        results[testPhrase] = false;
+                        results.Add(new NgramChainMatch<TPhrase>(testPhrase, false));
                     }
                 }
             }
+            
+            return new ChainPhraseProbability<TPhrase>(results);
+        }
 
-            var matchCount = results.Count(a => a.Value);
-            var probability = Math.Round((double)matchCount / results.Count * 100, 2);
-
-            return new ChainPhraseProbability<TPhrase>
+        public double GetTransitionProbabilityUnigram(TPhrase currentState, TUnigram nextState)
+        {
+            try
             {
-                Probability = probability,
-                Raw = results
-            };
+                var potentialNext = GetMatches(currentState);
+                return (double)potentialNext.Count(s => s.Equals(nextState)) / potentialNext.Count;
+            }
+            catch (KeyNotFoundException)
+            {
+                return 0;
+            }
+        }
+
+        public double GetTransitionProbabilityPhrase(TPhrase currentState, TPhrase nextStates)
+        {
+            double pTotal = 1;
+            foreach (var followingState in SplitTokens(nextStates))
+            {
+                var p = GetTransitionProbabilityUnigram(currentState, followingState);
+                pTotal = pTotal * p;
+
+                if (pTotal == 0)
+                {
+                    break;
+                }
+
+                var newSequence = SplitTokens(currentState).ToList();
+                newSequence.Add(followingState);
+                currentState = RebuildPhrase(newSequence);
+            }
+
+            return pTotal;
         }
     }
 }

@@ -34,5 +34,9 @@ namespace MarkovSharp.TokenisationStrategies
         IEnumerable<StateStatistic<TUnigram>> GetStatistics();
 
         ChainPhraseProbability<TPhrase> GetFit(TPhrase test);
+
+        double GetTransitionProbabilityUnigram(TPhrase currentState, TUnigram nextStates);
+
+        double GetTransitionProbabilityPhrase(TPhrase currentState, TPhrase nextStates);
     }
 }

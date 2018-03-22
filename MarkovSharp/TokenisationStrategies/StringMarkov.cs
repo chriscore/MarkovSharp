@@ -16,7 +16,7 @@ namespace MarkovSharp.TokenisationStrategies
         {
             if (input == null)
             {
-                return new List<string>() { GetPrepadUnigram() };
+                return new List<string> { GetPrepadUnigram() };
             }
 
             input = input.Trim();
