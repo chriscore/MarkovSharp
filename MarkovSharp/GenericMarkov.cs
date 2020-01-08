@@ -90,7 +90,7 @@ namespace MarkovSharp
 
                 Logger.Info($"Learning {newTerms.Count()} lines");
                 // For every sentence which hasnt already been learnt, learn it
-                Parallel.ForEach(phrases, Learn);
+                Parallel.ForEach(newTerms, Learn);
             }
             else
             {
